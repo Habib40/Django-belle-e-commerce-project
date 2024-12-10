@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <!--Body Content-->
+    <div id="page-content">
+    	<!--Home slider-->
+    	<div class="slideshow slideshow-wrapper pb-section">
+        	<div class="home-slideshow">
+            	<div class="slide">
+                	<div class="blur-up lazyload">
+                        <img class="blur-up lazyload" data-src="{% static 'assets/images/slideshow-banners/home2-default-banner1.jpg' %}" src="{% static 'assets/images/slideshow-banners/home2-default-banner1.jpg' %}" alt="Shop Our New Collection" title="Shop Our New Collection" />
+                        <div class="slideshow__text-wrap slideshow__overlay classic middle">
+                            <div class="slideshow__text-content middle">
+                            	<div class="container">
+                                    <div class="wrap-caption right">
+                                        <h2 class="h1 mega-title slideshow__title">Our New Collection</h2>
+                                        <span class="mega-subtitle slideshow__subtitle">Save up to 50% Off</span>
+                                        <span class="btn">Shop now</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide">
+                	<div class="blur-up lazyload">
+                        <img class="blur-up lazyload" data-src="{% static 'assets/images/slideshow-banners/home2-default-banner2.jpg' %}" src="{% static 'assets/images/slideshow-banners/home2-default-banner2.jpg' %}" alt="Summer Bikini Collection" title="Summer Bikini Collection" />
+                        <div class="slideshow__text-wrap slideshow__overlay classic middle">
+                            <div class="slideshow__text-content middle">
+                            	<div class="container">
+                                    <div class="wrap-caption center">
+                                        <h2 class="h1 mega-title slideshow__title">Fashion &amp; Show</h2>
+                                        <span class="mega-subtitle slideshow__subtitle">A World Fashion and Trendy Fashion Clother's</span>
+                                        <span class="btn">Shop now</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--End Home slider-->
+       <!--Weekly Bestseller-->
+<div class="section weekly-bestseller mb-4"> <!-- Added mb-4 for bottom margin -->
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="section-header text-center">
+                    <h2 class="h2">Weekly Bestseller</h2>
+                    <p>Our most popular products based on sales</p>
+                </div>
+                <div class="productSlider grid-products">
+                    {% for item in products %}
+                    <div class="col-12 item">
+                        <div class="product-image">
+                            <a href="{{ item.get_url }}" class="grid-view-item__link">
+                                <img class="primary blur-up lazyload img-fluid" style="height: 240px; object-fit: cover;" data-src="{{ item.images.url }}" src="assets/images/product-images/product-image1.jpg" alt="image" title="product">
+                                <img class="hover blur-up lazyload img-fluid" style="height: 240px; object-fit: cover;" data-src="{{ item.hoverImg.url }}" src="assets/images/product-images/product-image1-1.jpg" alt="image" title="product">
+                                
+                                {% if item.labels %}
+                                    <div class="product-labels rectangular">
+                                        <span class="lbl on-sale"><small>{{ item.labels|lower }}</small></span>
+                                    </div>
+                                {% endif %}
+                            </a>
+                            <form class="variants add" action="#" method="post">
+                                <a href="{{item.get_url}}">
+                                    <button class="btn btn-view-details" type="button" tabindex="0">View Details</button>
+                                </a>
+                            </form>
+                            <div class="button-set">
+                                <a href="javascript:void(0)" title="Quick View" class="quick-view-popup quick-view" data-toggle="modal" data-target="#content_quickview">
+                                    <i class="icon anm anm-search-plus-r"></i>
+                                </a>
+                                <div class="wishlist-btn">
+                                    <a class="wishlist add-to-wishlist" href="wishlist.html">
+                                        <i class="icon anm anm-heart-l"></i>
+                                    </a>
+                                </div>
+                                <div class="compare-btn">
+                                    <a class="compare add-to-compare" href="compare.html" title="Add to Compare">
+                                        <i class="icon anm anm-random-r"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="product-details text-center">
+                            <div class="product-name">
+                                <a href="product-layout-1.html">{{ item.title }}</a>
+                            </div>
+                            <div class="product-price">
+                                <span class="old-price">{{ item.price }} </span>
+                                <span class="price">{{ item.discount_amount }}</span>
+                            </div>
+                            <ul class="swatches">
+                                <li class="swatch small rounded navy" rel="assets/images/product-images/product-image-stw1.jpg"></li>
+                                <li class="swatch small rounded green" rel="assets/images/product-images/product-image-stw1-1.jpg"></li>
+                                <li class="swatch small rounded gray" rel="assets/images/product-images/product-image-stw1-2.jpg"></li>
+                                <li class="swatch small rounded aqua" rel="assets/images/product-images/product-image-stw1-3.jpg"></li>
+                                <li class="swatch small rounded orange" rel="assets/images/product-images/product-image-stw1-4.jpg"></li>
+                            </ul>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Weekly Bestseller-->
+
+<!--Parallax Section-->
+<div class="section">
+    <div class="hero hero--large hero__overlay bg-size">
+        <img class="bg-img" src="{% static 'assets/images/parallax-banners/parallax-banner.jpg' %}" alt="" />
+        <div class="hero__inner">
+            <div class="container">
+                <div class="wrap-text left text-small font-bold">
+                    <h5 class="h2 mega-title">Belle <br> The best choice for your store</h5>
+                    <div class="rte-setting mega-subtitle">Lorem Ipsum is simply dummy text of the printing and typesetting industry...</div>
+                    <a href="#" class="btn">Purchase Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--End Parallax Section-->
+<!-- New Arrivals -->
+<div class="product-rows section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="section-header text-center">
+                    <h2 class="h2">New Arrivals</h2>
+                    <p>Grab these new items before they are gone!</p>
+                </div>
+            </div>
+        </div>
+        <div class="grid-products">
+            <div class="row">
+                {% for new in new_products %}
+                <div class="col-6 col-sm-2 col-md-3 col-lg-3 item">
+                    <div class="product-image">
+                        <a href="{{ new.get_url }}" class="grid-view-item__link">
+                            <img class="primary blur-up lazyload" data-src="{{ new.images.url }}" src="{{ new.images.url }}" alt="{{ new.title }}" title="{{ new.title }}">
+                            <img class="hover blur-up lazyload" data-src="{{ new.hoverImg.url }}" src="{{ new.hoverImg.url }}" alt="{{ new.title }}" title="{{ new.title }}">
+                        </a>
+                        <div class="product-labels rectangle">
+                            <span class="lbl on-sale">{{ new.labels }}</span>
+                        </div>
+                        <form class="variants add" action="{{new.get_url}}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_color_id" value="{{ product_color.id }}"> <!-- Assuming product_color is defined in your context -->
+                            <button class="btn btn-addto-cart" type="submit">View Details</button>
+                        </form>
+                        <div class="button-set">
+                            <a href="javascript:void(0)" title="Quick View" class="quick-view-popup quick-view" data-toggle="modal" data-target="#content_quickview">
+                                <i class="icon anm anm-search-plus-r"></i>
+                            </a>
+                            <div class="wishlist-btn"> 
+                                <a class="wishlist add-to-wishlist" href="wishlist.html">
+                                    <i class="icon anm anm-heart-l"></i>
+                                </a>
+                            </div>
+                            <div class="compare-btn">
+                                <a class="compare add-to-compare" href="compare.html" title="Add to Compare">
+                                    <i class="icon anm anm-random-r"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-details text-center">
+                        <div class="product-name">
+                            <a href="product-layout-1.html">{{ new.title }}</a>
+                        </div>
+                        <div class="product-price">
+                            <span class="price">${{ new.price }}</span>
+                        </div>
+                        <ul class="swatches">
+                            {% for color in new.colors %}
+                            <li class="swatch small rounded {{ color.class }}" rel="{% static 'assets/images/product-images/'|add:color.image %}"></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <!-- View All Button -->
+        <div class="text-center">
+            <a href="#" class="btn btn-view-all">View All New Arrivals</a>
+        </div>
+    </div>
+</div>
+<!-- End New Arrivals -->
+
+<!-- Logo Slider -->
+<div class="section logo-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="section-header text-center">
+                    <h2 class="h2">The Most Loved Brands</h2>
+                </div>
+                <div class="logo-bar">
+                    {% for brand in brands %}
+                    <div class="logo-bar__item">
+                        <img src="{% static 'assets/images/logo/'|add:brand.logo %}" alt="{{ brand.name }}" title="{{ brand.name }}" />
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Logo Slider -->
+    <!--End Body Content-->
+{% endblock  %}
