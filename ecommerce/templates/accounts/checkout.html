@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="section-content padding-y bg">
+    <div class="container">
+        <div class="row">  
+            <aside class="col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title mb-2">Billing Address</h4>
+                        {% if messages %}
+                        <div id="message" class="btn btn-success btn-block">
+                            {% for message in messages %}
+                                <div class="alert">{{ message }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <script>
+                            window.onload = function() {
+                                setTimeout(function() {
+                                    var messageDiv = document.getElementById('message');
+                                    if (messageDiv) {
+                                        messageDiv.style.display = 'none'; // Hide the message after 4 seconds
+                                    }
+                                }, 4000); // 4000 milliseconds = 4 seconds
+                            };
+                        </script>
+                        <!-- Display non-field errors -->
+                        {% if form.non_field_errors %}
+                        <div class="errorlist">
+                            {% for error in form.non_field_errors %}
+                                <p class="error">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <form action="{% url 'place_order' %}" method="POST">
+                            {% csrf_token %}
+                            {% if form.errors %}
+                                <div class="alert alert-danger">
+                                    <ul>
+                                        {% for field, errors in form.errors.items %}
+                                            <li>{{ field }}: {{ errors|join:", " }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="first_name">First Name:</label>
+                                    <input type="text" name="first_name" id="first_name" class="form-control" placeholder="Enter first name" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="last_name">Last Name:</label>
+                                    <input type="text" name="last_name" id="last_name" class="form-control" placeholder="Enter last name" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="email">Email:</label>
+                                    <input type="email" name="email" id="email" class="form-control" placeholder="Enter email address" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="phone">Phone Number:</label>
+                                    <input type="text" name="phone" id="phone" class="form-control" placeholder="Enter phone number" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="address_line_1">Address Line 1:</label>
+                                    <input type="text" name="address_line_1" id="address_line_1" class="form-control" placeholder="Enter address" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="address_line_2">Address Line 2:</label>
+                                    <input type="text" name="address_line_2" id="address_line_2" class="form-control" placeholder="Enter address">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="city">City:</label>
+                                    <input type="text" name="city" id="city" class="form-control" placeholder="Enter city name" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="state">State:</label>
+                                    <input type="text" name="state" id="state" class="form-control" placeholder="Enter state name" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="country">Country:</label>
+                                    <input type="text" name="country" id="country" class="form-control" placeholder="Enter country name" required>
+                                </div>
+                                <div class="form-group col-12">
+                                    <label for="order_note">Order Note:</label>
+                                    <textarea name="order_note" id="order_note" class="form-control" placeholder="Add any special instructions or notes" rows="3"></textarea>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-outline-primary d-flex ">Place Order</button>
+                        </form>
+                    </div>
+                </div>
+            </aside>
+
+            <aside class="col-lg-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Shopping Cart</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless table-shopping-cart">
+                            <thead class="text-muted">
+                                <tr class="small text-uppercase">
+                                    <th scope="col">Product</th>
+                                    <th scope="col" width="120">Quantity</th>
+                                    <th scope="col" width="120">Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if cart_items %}
+                                    {% for cart_item in cart_items %}
+                                    <tr>
+                                        <td>
+                                            <figure class="itemside align-items-center">
+                                                <div class="aside">
+                                                    <img src="{{ cart_item.product.images.url|default:'path/to/placeholder/image.png' }}" class="img-sm rounded" style="height: 100px;" alt="{{ cart_item.product.title }}">
+                                                </div>
+                                                <figcaption class="info">
+                                                    <a href="{{ cart_item.product.get_url }}" class="title text-dark">
+                                                        <h6 class="mb-1">{{ cart_item.product.title }}</h6>
+                                                    </a>
+                                                </figcaption>
+                                            </figure>
+                                        </td>
+                                        <td>
+                                            <div class="col">
+                                                <span class="badge badge-light">{{ cart_item.quantity }}</span>
+                                                <form action="#" method="POST" style="display:inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="price-wrap">
+                                                <var class="price">${{ sub_total|floatformat:2 }}</var>
+                                                <small class="text-muted">
+                                                    ${{ cart_item.product.discount_amount|floatformat:2 }} 
+                                                </small>
+                                                <p class="text text-info mb-0">Unit Price</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="3" class="text-center text-danger">Your cart is empty.</td>
+                                    </tr>
+                                {% endif %}
+                                
+                                <tr>
+                                    <td colspan="2">
+                                        <hr>
+                                        <p>Grand Total With Tax: <b>${{ grand_total|floatformat:2 }}</b></p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p class="text-center">
+                            <a href="{% url 'store' %}" class="btn btn-primary btn-block">Continue Shopping</a>
+                        </p>
+                    </div>
+                </div>
+            </aside>
+    </div>
+</section>
+{% endblock %}

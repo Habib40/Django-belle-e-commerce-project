@@ -7,6 +7,10 @@ from .forms import ReviewForm
 from django.contrib import messages
 from decimal import Decimal
 from django.core.exceptions import ObjectDoesNotExist
+from category .models import Category
+from django.http import HttpResponse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
 # Create your views here.
 
 
@@ -19,15 +23,42 @@ def Index(request):
     
     return render(request,'shop/home2.html',{'products':products,'new_products':new_products})
 
+def OureStore(request, category_slug=None):
+    category = None
+    products = None
+    count = 0  # Initialize count
 
-def ProductDetail(request, product_id, product_slug):
+    if category_slug is not None:
+        category = get_object_or_404(Category, slug=category_slug)
+        products = Product.objects.filter(category=category, is_available=True)  # Use correct field name
+        paginator = Paginator(products,6) # Show 6 products in per page
+        page = request.GET.get('page')
+        pagged_products = paginator.get_page(page)
+        count = products.count()
+    else:
+        products = Product.objects.filter(is_available=True).order_by('id')
+        paginator = Paginator(products,6) # Show 6 products in per page
+        page = request.GET.get('page')
+        pagged_products = paginator.get_page(page)
+        count = products.count()  # Count the number of available products
+        
+    return render(request, 'shop/store.html', {
+        'products': pagged_products, 'count': count,
+    })
+
+
+
+
+def ProductDetail(request, category_slug, product_slug):
     # Initialize variables for savings and discount percentage
     savings = 0
     discount_percentage = 0
 
     # Get the product or return a 404 error if it doesn't exist
-    products = get_object_or_404(Product, id=product_id, slug=product_slug)
-    product_color = ProductColor.objects.filter(product_id=product_id)
+    products = get_object_or_404(Product, category__slug=category_slug, slug=product_slug)
+
+    # Now filter ProductColor based on the product instance
+    product_color = ProductColor.objects.filter(product=products)
    
     # Get reviews for the product
     reviews = Review.objects.filter(product=products).order_by('-created_at')
@@ -38,17 +69,16 @@ def ProductDetail(request, product_id, product_slug):
     if request.method == 'POST':
         form = ReviewForm(request.POST)
         if form.is_valid():
-            review = form.save(commit=False)  # Create a review instance but don't save it yet
-            review.product = products  # Associate the review with the product
-            review.save()  # Save the review
+            review = form.save(commit=False)
+            review.product = products
+            review.save()
             messages.success(request, 'Your review has been submitted successfully!')
-            return redirect('productDtails', product_id=products.id, product_slug=products.slug)  # Redirect to the same product page
+            return redirect('productDetails', category_slug=category_slug, product_slug=products.slug)
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
-        form = ReviewForm()  # Create a new form instance
+        form = ReviewForm()
 
-    
     # Fetch related images
     images = products.additional_images.all()
 
@@ -57,13 +87,10 @@ def ProductDetail(request, product_id, product_slug):
         savings = products.price - (products.discount_amount or 0)
         discount_percentage = (savings / products.price * 100) if products.price else 0
 
-    # Calculate sales message
-    # Assuming last_sale_in_hours is a float or integer representing total hours
     # Increment views or last sale hours
-    # Increment the view count
-    products.increment_last_sale_in_hours()  
+    products.increment_last_sale_in_hours()
 
-    # Prepare the sales message based on last_sale_in_hours
+    # Sales message logic
     if products.last_sale_in_hours >= 24:
         days = products.last_sale_in_hours // 24
         hours = products.last_sale_in_hours % 24
@@ -75,16 +102,14 @@ def ProductDetail(request, product_id, product_slug):
     else:
         sales_message = f"{products.items_sold} sold in the last {products.last_sale_in_hours} hours"
 
-    # Use sales_message as needed
-    print(sales_message)  # or pass it to the context for rendering in a template
-            # Prepare context for rendering
+    # Prepare context for rendering
     context = {
-        'color':[pc.color_name for pc in product_color],
-        'size':[pc.size for pc in product_color],
+        'color': [pc.color_name for pc in product_color],
+        'size': [pc.size for pc in product_color],
         'user_id': request.user.id if request.user.is_authenticated else None,
         'sales_message': sales_message,
         'items_sold': products.items_sold,
-        'products': products,  
+        'products': products,
         'savings': savings,
         'images': images,
         'form': form,
@@ -93,7 +118,7 @@ def ProductDetail(request, product_id, product_slug):
         'review_count': review_count,
         'discount_percentage': round(discount_percentage),
     }
-    print(context)
+
     return render(request, 'shop/productDetail.html', context)
 
 

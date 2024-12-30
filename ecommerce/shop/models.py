@@ -1,5 +1,5 @@
 from django.db import models
-# from .models import ProductColor
+from category.models import Category
 from django.core.exceptions import ValidationError
 from django.utils.text import slugify
 from django.db.models.signals import post_save
@@ -56,7 +56,7 @@ class Product(models.Model):
     related_products = models.ManyToManyField('self', symmetrical=False, related_name='related_to', blank=True)# Self-referential many-to-many relationship
     images = models.ImageField(upload_to='products/')
     hoverImg = models.ImageField(upload_to='hover_images/', null=True, blank=True)
-   
+    category = models.ForeignKey(Category,on_delete=models.CASCADE,null=True,blank=True)
     sku = models.CharField(max_length=100, unique=True)
     ratings_count = models.PositiveIntegerField(default=0)
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -119,7 +119,7 @@ class Product(models.Model):
         return self.images.url
     
     def get_url(self):
-      return reverse('productDtails', args=[self.id,self.slug])
+      return reverse('productDetails', args=[self.category.slug,self.slug])
 
     def __str__(self):
         return self.title

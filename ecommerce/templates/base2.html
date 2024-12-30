@@ -66,8 +66,14 @@
                 <div class="col-2 col-sm-4 col-md-3 col-lg-4 text-right">
                 	<span class="user-menu d-block d-lg-none"><i class="anm anm-user-al" aria-hidden="true"></i></span>
                     <ul class="customer-links list-inline">
-                        <li><a href="login.html">Login</a></li>
-                        <li><a href="register.html">Create Account</a></li>
+                        {% if not user.is_authenticated %}
+                            <li><a href="{% url 'login' %}">Login</a></li>
+                            <li><a href="{% url 'register' %}">Create Account</a></li>
+                        {% endif %}
+                        {% if user.is_authenticated %}
+                            <li><a href="{% url 'dashboard' %}">{{request.user.first_name}}</a></li>
+                            <li><a href="{% url 'logout' %}">Logout</a></li>
+                        {% endif %}
                         <li><a href="wishlist.html">Wishlist</a></li>
                     </ul>
                 </div>
@@ -96,8 +102,18 @@
                         <!--Desktop Menu-->
                         <nav class="grid__item" id="AccessibleNav"><!-- for mobile -->
                             <ul id="siteNav" class="site-nav medium center hidearrow">
-                                <li class="lvl1 parent megamenu"><a href="{% url 'index' %}">Home <i class="anm anm-angle-down-l"></i></a>
-                            </li>
+                            
+                                <li class="lvl1 parent megamenu"><a href="{% url 'store' %}">Store <i class="anm anm-angle-down-l"></i></a>
+                                    
+                                </li>
+                                
+                                <li class="lvl1 parent dropdown"><a href="#">Category <i class="anm anm-angle-down-l"></i></a>
+                                    <ul class="dropdown">
+                                        {% for category in links %}
+                                            <li><a href="{{ category.get_url }}" class="site-nav">{{ category.name }}</a></li>
+                                        {% endfor %}
+                                    </ul>
+                                </li>
                             <li class="lvl1 parent dropdown"><a href="#">Pages <i class="anm anm-angle-down-l"></i></a>
                               <ul class="dropdown">
                               	<li><a href="{% url 'carts' %}" class="site-nav">Cart Page <i class="anm anm-angle-right-l"></i></a>
@@ -151,55 +167,55 @@
                                 <span id="CartCount" class="site-header__cart-count" data-cart-render="item_count">{{items_count}}</span>
                             </a>
                             <!--Minicart Popup-->
-                            <div id="header-cart" class="block block-cart">
-                                <ul class="mini-products-list">
-                                    {% for item in cart_items %}
-                                        <li class="item">
-                                            <a class="product-image" href="#">
-                                                <img src="{{ item.product.images.url }}" alt="{{ item.product.title }}" title="{{ item.product.title }}" />
-                                            </a>
-                                            <div class="product-details">
-                                                <a href="{% url 'remove_cart' item.product.id %}" class="remove"><i class="anm anm-times-l" aria-hidden="true"></i></a>
-                                                <a class="edit-i remove"><i class="anm anm-edit" aria-hidden="true"></i></a>
-                                                <a class="pName" href="#">{{ item.product.title }}</a>
-                                                <div class="variant-cart">{{ item.product.color }} / {{ item.product.size }}</div>
-                                                <div class="wrapQtyBtn">
-                                                    <div class="qtyField">
-                                                        <span class="label">Qty:</span>
-                                                        <a class="qtyBtn minus" href="{% url 'minus_cart' item.product.id item.id %}"><i class="fa anm anm-minus-r" aria-hidden="true"></i></a>
+                           <div id="header-cart" class="block block-cart">
+                            <ul class="mini-products-list">
+                                {% for item in cart_items %}
+                                    <li class="item">
+                                        <a class="product-image" href="#">
+                                            <img src="{{ item.product.images.url }}" alt="{{ item.product.title }}" title="{{ item.product.title }}" />
+                                        </a>
+                                        <div class="product-details">
+                                            <a href="{% url 'remove_cart' item.product.id %}" class="remove"><i class="anm anm-times-l" aria-hidden="true"></i></a>
+                                            <a class="edit-i remove"><i class="anm anm-edit" aria-hidden="true"></i></a>
+                                            <a class="pName" href="#">{{ item.product.title }}</a>
+                                            <div class="variant-cart">{{ item.product.color }} / {{ item.product.size }}</div>
+                                            <div class="wrapQtyBtn">
+                                                <div class="qtyField">
+                                                    <span class="label">Qty:</span>
+                                                    <a class="qtyBtn minus" href="{% url 'minus_cart' item.product.id  %}"><i class="fa anm anm-minus-r" aria-hidden="true"></i></a>
 
-                                                        <input type="text" id="Quantity" name="quantity" value="{{ item.quantity }}" class="product-form__input qty">
+                                                    <input type="text" id="Quantity" name="quantity" value="{{ item.quantity }}" class="product-form__input qty">
 
-                                                        <a class="qtyBtn plus" href="{% url 'addToCart' item.product.id %}"><i class="fa anm anm-plus-r" aria-hidden="true"></i></a>
-                                                    </div>
-                                                </div>
-                                                <div class="priceRow">
-                                                    <div class="product-price">
-                                                        <span class="money">${{ item.product.discount_amount|floatformat:2 }}</span>
-                                                    </div>
-                                                    <div class="subtotal">
-                                                        <span class="label">Subtotal:</span>
-                                                        <span class="money">${{item.total}}</span>
-                                                    </div>
+                                                    <a class="qtyBtn plus" href="{% url 'addToCart' item.product.id %}"><i class="fa anm anm-plus-r" aria-hidden="true"></i></a>
                                                 </div>
                                             </div>
-                                        </li>
-                                    {% empty %}
-                                        <li class="item">Your cart is empty.</li>
-                                    {% endfor %}
-                                </ul>
-                                <div class="total">
-                                    <div class="total-in">
-                                        <span class="label">Grand Total:</span>
-                                        <span class="product-price"><span class="money">${{ grand_total|floatformat:2 }}</span></span>
-                                    </div>
-                                    <div class="buttonSet text-center">
-                                        <a href="{% url 'carts' %}" class="btn btn-secondary btn--small">View Cart</a>
-                                        <a href="checkout.html" class="btn btn-secondary btn--small">Checkout</a>
-                                    </div>
+                                            <div class="priceRow">
+                                                <div class="product-price">
+                                                    <span class="money">${{ item.product.discount_amount|floatformat:2 }}</span>
+                                                </div>
+                                                <div class="subtotal">
+                                                    <span class="label">Subtotal:</span>
+                                                    <span class="money">${{item.total}}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                {% empty %}
+                                    <li class="item">Your cart is empty.</li>
+                                {% endfor %}
+                            </ul>
+                            <div class="total">
+                                <div class="total-in">
+                                    <span class="label">Grand Total:</span>
+                                    <span class="product-price"><span class="money">${{ grand_total|floatformat:2 }}</span></span>
+                                </div>
+                                <div class="buttonSet text-center">
+                                    <a href="{% url 'carts' %}" class="btn btn-secondary btn--small">View Cart</a>
+                                    <a href="checkout.html" class="btn btn-secondary btn--small">Checkout</a>
                                 </div>
                             </div>
-                            <!--End Minicart Popup-->
+                        </div>
+                        <!--End Minicart Popup-->
                         </div>
                         <div class="site-header__search">
                             <button type="button" class="search-trigger"><i class="icon anm anm-search-l"></i></button>

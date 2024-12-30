@@ -41,10 +41,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'shop',
-    'cart',
     'category',
+    'cart',
+    'order',
     'account',
     'Api_APP',
+    
 ]
 
 MIDDLEWARE = [
@@ -71,12 +73,16 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'cart.context_processors.cart_context',  # Add your context processor here
+                'category.context_processors.menue_links',
             ],
         },
     },
 ]
 
 WSGI_APPLICATION = 'ecommerce.wsgi.application'
+
+# for custom user table in admin panel
+AUTH_USER_MODEL = 'account.Account'
 
 
 # Database
@@ -137,3 +143,12 @@ MEDIA_ROOT = BASE_DIR/'media'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'habibkb5080@gmail.com'
+EMAIL_HOST_PASSWORD = 'fgzzzljvhqrnctkn'
+
+PASSWORD_RESET_TOKEN_GENERATOR = 'django.contrib.auth.tokens.PasswordResetTokenGenerator'

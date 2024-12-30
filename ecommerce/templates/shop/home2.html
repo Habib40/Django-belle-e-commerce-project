@@ -54,7 +54,7 @@
                     {% for item in products %}
                     <div class="col-12 item">
                         <div class="product-image">
-                            <a href="{{ item.get_url }}" class="grid-view-item__link">
+                            <a href="{{ item.get_url  }}" class="grid-view-item__link">
                                 <img class="primary blur-up lazyload img-fluid" style="height: 240px; object-fit: cover;" data-src="{{ item.images.url }}" src="assets/images/product-images/product-image1.jpg" alt="image" title="product">
                                 <img class="hover blur-up lazyload img-fluid" style="height: 240px; object-fit: cover;" data-src="{{ item.hoverImg.url }}" src="assets/images/product-images/product-image1-1.jpg" alt="image" title="product">
                                 
@@ -143,17 +143,17 @@
                 <div class="col-6 col-sm-2 col-md-3 col-lg-3 item">
                     <div class="product-image">
                         <a href="{{ new.get_url }}" class="grid-view-item__link">
-                            <img class="primary blur-up lazyload" data-src="{{ new.images.url }}" src="{{ new.images.url }}" alt="{{ new.title }}" title="{{ new.title }}">
+                    orm>        <img class="primary blur-up lazyload" data-src="{{ new.images.url }}" src="{{ new.images.url }}" alt="{{ new.title }}" title="{{ new.title }}">
                             <img class="hover blur-up lazyload" data-src="{{ new.hoverImg.url }}" src="{{ new.hoverImg.url }}" alt="{{ new.title }}" title="{{ new.title }}">
                         </a>
                         <div class="product-labels rectangle">
                             <span class="lbl on-sale">{{ new.labels }}</span>
                         </div>
-                        <form class="variants add" action="{{new.get_url}}" method="post">
+                        <f class="variants add" action="{{new.get_url}}" method="post">
                             {% csrf_token %}
                             <input type="hidden" name="product_color_id" value="{{ product_color.id }}"> <!-- Assuming product_color is defined in your context -->
                             <button class="btn btn-addto-cart" type="submit">View Details</button>
-                        </form>
+                        </f
                         <div class="button-set">
                             <a href="javascript:void(0)" title="Quick View" class="quick-view-popup quick-view" data-toggle="modal" data-target="#content_quickview">
                                 <i class="icon anm anm-search-plus-r"></i>

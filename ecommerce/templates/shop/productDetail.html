@@ -6,18 +6,34 @@
      <div id="page-content">
         <!--MainContent-->
         <div id="MainContent" class="main-content" role="main">
-            <!--Breadcrumb-->
+            <!-- Breadcrumb -->
             <div class="bredcrumbWrap">
                 <div class="container breadcrumbs">
-                    <a href="index.html" title="Back to the home page">Home</a><span aria-hidden="true">›</span><span>Product Layout Style1 </span>
+                    <a href="index.html" title="Back to the home page">Home</a>
+                    <span aria-hidden="true">›</span>
+                    <span>Product Layout Style 1</span>
+                    
                     {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-success">{{ message }}</div>
-                        {% endfor %}
-                        {% endif %}
+                        <div id="message" class="alert alert-success">
+                            {% for message in messages %}
+                                {{ message }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
             </div>
-            <!--End Breadcrumb-->
+            <!-- End Breadcrumb -->
+
+            <script>
+                window.onload = function() {
+                    setTimeout(function() {
+                        var messageDiv = document.getElementById('message');
+                        if (messageDiv) {
+                            messageDiv.style.display = 'none'; // Hide the message after 4 seconds
+                        }
+                    }, 4000); // 4000 milliseconds = 4 seconds
+                };
+            </script>
             
             <div id="ProductSection-product-template" class="product-template__container prstyle1 container">
                 <!--product-single-->
@@ -280,7 +296,7 @@
                                         </div>
                                     
                                         <div class="spr-form clearfix">
-                                            <form method="post" action="{% url 'productDtails' products.id products.slug %}" id="new-review-form" class="new-review-form">
+                                            <form method="post" action="{% url 'productDetails' products.category.slug products.slug  %}" id="new-review-form" class="new-review-form">
                                                 {% csrf_token %}
                                                 <h3 class="spr-form-title">Write a review</h3>
                                                 <fieldset class="spr-form-contact">

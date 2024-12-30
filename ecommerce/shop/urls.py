@@ -9,9 +9,12 @@ from .views import custom_404_view
 
 urlpatterns = [
     
-    path('',views.Index,name='index'),
+    
+    path('',views.OureStore,name='store'),
+    path('category/<slug:category_slug>/', views.OureStore, name='store_by_category'),  # For category-specific products
     path('load/', views.LoadProducts),
-    path('details/<int:product_id>/<slug:product_slug>/',views.ProductDetail,name='productDtails'),
+    path('details/<slug:category_slug>/<slug:product_slug>/', views.ProductDetail, name='productDetails'),
+    
     
 ]
 # Set the custom 404 handler

@@ -30,7 +30,7 @@ class ProductAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}  # Automatically generate slug from title
     fieldsets = (
         (None, {
-            'fields': ('title', 'slug', 'images', 'hoverImg', 'sku', 'description')
+            'fields': ('title', 'slug', 'images', 'hoverImg', 'sku','category', 'description')
         }),
         ('Pricing', {
             'fields': ('price', 'discount_amount', 'compare_price', 'quantity_sold', 'quantity_left', 'stock')
