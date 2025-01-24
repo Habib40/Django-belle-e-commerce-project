@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base2.html' %}
 {% load static %}
 {% block content %}
     <!-- ========================= SECTION CONTENT ========================= -->
@@ -26,45 +26,61 @@
                 };
             </script>
             <form action="{% url 'register' %}" method="POST">
-              {% csrf_token %}
-                    <div class="form-row">
-                        <div class="col form-group">
-                            <label>First name</label>
-                            {{forms.first_name}}
-                        </div> <!-- form-group end.// -->
-                        <div class="col form-group">
-                            <label>Last name</label>
-                            {{forms.last_name}}
-                        </div> <!-- form-group end.// -->
-                    </div> <!-- form-row end.// -->
-                  <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label>Email</label>
-                        {{forms.email}}
-                    </div> <!-- form-group end.// -->
-                  <div>
-                    <div class="form-row">
-                        
-                        <div class="form-group col-md-6">
-                          <label>Phone Number</label>
-                          {{forms.phone_number}}
-                        </div> <!-- form-group end.// -->
-                    </div> <!-- form-row.// -->
-                    <div class="form-row">
-                        <div class="form-group col-md-6">
-                            <label>Create password</label>
-                            {{forms.password}}
-                        </div> <!-- form-group end.// --> 
-                        <div class="form-group col-md-6">
-                            <label>Repeat password</label>
-                            {{forms.confirm_password}}
-                        </div> <!-- form-group end.// -->  
+                {% csrf_token %}
+                
+                <!-- Display error messages -->
+                {% if forms.errors %}
+                    <div class="alert alert-danger">
+                        <ul>
+                            {% for field, errors in forms.errors.items %}
+                                {% for error in errors %}
+                                    <li>{{ field|capfirst }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
                     </div>
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-primary btn-block"> Register  </button>
-                    </div> <!-- form-group// -->      
-                        
-                </form>
+                {% endif %}
+            
+                <div class="form-row">
+                    <div class="col form-group">
+                        <label for="id_first_name">First name</label>
+                        <input type="text" name="first_name" id="id_first_name" class="form-control" value="{{ forms.first_name.value|default_if_none:'' }}" required>
+                    </div> <!-- form-group end.// -->
+                    <div class="col form-group">
+                        <label for="id_last_name">Last name</label>
+                        <input type="text" name="last_name" id="id_last_name" class="form-control" value="{{ forms.last_name.value|default_if_none:'' }}" required>
+                    </div> <!-- form-group end.// -->
+                </div> <!-- form-row end.// -->
+            
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="id_email">Email</label>
+                        <input type="email" name="email" id="id_email" class="form-control" value="{{ forms.email.value|default_if_none:'' }}" required>
+                    </div> <!-- form-group end.// -->
+                </div> <!-- form-row end.// -->
+            
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="id_phone_number">Phone Number</label>
+                        <input type="text" name="phone_number" id="id_phone_number" class="form-control" value="{{ forms.phone_number.value|default_if_none:'' }}" required>
+                    </div> <!-- form-group end.// -->
+                </div> <!-- form-row end.// -->
+            
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="id_password">Create password</label>
+                        <input type="password" name="password" id="id_password" class="form-control" required>
+                    </div> <!-- form-group end.// --> 
+                    <div class="form-group col-md-6">
+                        <label for="id_confirm_password">Repeat password</label>
+                        <input type="password" name="confirm_password" id="id_confirm_password" class="form-control" required>
+                    </div> <!-- form-group end.// -->  
+                </div> <!-- form-row end.// -->
+            
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-block"> Register </button>
+                </div> <!-- form-group end.// -->
+            </form>
             </article><!-- card-body.// -->
         </div> <!-- card .// -->
         <p class="text-center mt-4">Have an account? <a href="{% url 'login' %}">Log In</a></p>

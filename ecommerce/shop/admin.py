@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Product,ProductColor,ProductImage,Review
+from .models import Product,ProductColor,ProductImage,Review,WishList
 from django.contrib import admin
 from django.utils.html import format_html
 from django.contrib import messages
@@ -85,3 +85,4 @@ def mark_as_approved(self, request, queryset):
     # Logic to mark reviews as approved
     self.message_user(request, "Selected reviews have been marked as approved.")
 
+admin.site.register(WishList)

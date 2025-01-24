@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0; /* Removed padding */
+            background-color: #f9f9f9;
+            color: #333;
+            font-size: 12px; /* Smaller font size */
+        }
+        .invoice-container {
+            background: white;
+            border-radius: 0; /* Removed border radius */
+            box-shadow: none; /* Removed shadow */
+            max-width: 100%; /* Allow full width */
+            margin: 0; /* Removed margin */
+        }
+        h1, h2 {
+            color: #0056b3;
+            font-size: 14px; /* Slightly smaller font size */
+            margin: 0; /* Removed margin */
+            padding: 0; /* Removed padding */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0; /* Removed margin */
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 2px; /* Minimal padding */
+            text-align: left;
+            font-size: 12px; /* Consistent smaller font size */
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .divider {
+            height: 1px;
+            background-color: #ddd;
+            margin: 0; /* Removed margin */
+        }
+        .contact-info {
+            margin-top: 0; /* Removed margin */
+            font-size: 0.9em; /* Slightly smaller font size */
+        }
+        footer {
+            text-align: center;
+            margin-top: 0; /* Removed margin */
+            font-size: 0.8em;
+            color: #777;
+        }
+        @media (max-width: 600px) {
+            h1, h2 {
+                font-size: 12px; /* Further reduce for small screens */
+            }
+            table {
+                font-size: 10px; /* Further reduce for small screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <h1 style="text-align: center; background-color: #0056b3; color: white; padding: 10px; font-weight: bold;">
+            <img src="path/to/logo.png" alt="Company Logo" style="height: 50px; vertical-align: middle;"> Invoice
+        </h1>
+        <div class="greeting">
+            <p>Dear {{ order.first_name }},</p>
+            <p>Thank you for your order!</p>
+        </div>
+        
+        <p><strong>Order Number:</strong> {{ order.order_number }}</p>
+        <p><strong>Order Date:</strong> {{ order.created_at|date:"d F Y H:i" }}</p>
+
+        <h2>Delivery Details</h2>
+        <p><strong>Name:</strong> {{ order.first_name }} {{ order.last_name }}</p>
+        <p><strong>Email:</strong> {{ order.email }}</p>
+        <p><strong>Phone:</strong> {{ order.phone }}</p>
+        <p><strong>Address:</strong> {{ order.address_line_1 }}</p>
+        <p><strong>State:</strong> {{ order.state }}</p>
+        <p><strong>City:</strong> {{ order.city }}</p>
+        <p><strong>Country:</strong> {{ order.country }}</p>
+
+        <div class="divider"></div>
+
+        <h2>Order Products</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Title</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order_product in order_products %}
+                <tr>
+                    <td>
+                        <img src="{{ request.scheme }}://{{ request.get_host }}{{ order_product.product.images.url }}" width="40" alt="Product Image"> <!-- Reduced image size -->
+                    </td>
+                    <td>{{ order_product.product.title }}</td>
+                    <td>${{ order_product.product.discount_amount }}</td>
+                    <td>{{ order_product.quantity }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+<br><br>
+        <h2>Tax: ${{ order.tax }}</h2>
+        <h2 class="total">Total Amount: ${{ order.order_total }}</h2>
+
+        <div class="contact-info">
+            <p>If you have any questions, feel free to contact us:</p>
+            <p>Email: <a href="mailto:support@yourcompany.com">support@belle.com</a> | Phone: (123) 456-7890</p>
+        </div>
+    </div>
+    <footer>
+        © {{ current_year }} Belle. All rights reserved.
+    </footer>
+</body>
+</html>

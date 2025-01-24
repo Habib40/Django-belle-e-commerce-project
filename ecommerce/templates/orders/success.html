@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="section-content padding-y bg">
+    <div class="container">
+        <h2 class="text-center">Payment Successful!</h2>
+        <div class="alert alert-success text-center">
+            <p>Thank you for your purchase!</p>
+            <p>Your payment has been processed successfully.</p>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                Order Summary
+            </div>
+            <div class="card-body">
+                <p><strong>Order ID:</strong> {{ order.id }}</p>
+                <p><strong>Total Amount:</strong> ${{ order.total_amount|floatformat:2 }}</p>
+                <p><strong>Date:</strong> {{ order.date }}</p>
+            </div>
+        </div>
+        
+        <div class="text-align-center mt-4">
+            <a href="{% url 'store' %}" class="btn btn-outline-primary">Continue Shopping</a>
+            <!--  -->
+        </div>
+    </div>
+</section>
+{% endblock %}

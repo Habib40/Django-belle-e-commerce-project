@@ -65,7 +65,9 @@
                             <li class="">French</li>
                         </ul>
                     </div>
-                    <p class="phone-no"><i class="anm anm-phone-s"></i> +440 0(111) 044 833</p>
+                    <p class="phone-no"></i><a href="https://wa.me/+8801744194831?" class="phone-no"><i class="anm anm-phone-s"></i> WhatsApp</a></p>
+                    
+
                 </div>
                 <div class="col-sm-4 col-md-4 col-lg-4 d-none d-lg-none d-md-block d-lg-block">
                     <div class="text-center"><p class="top-header_middle-text"> Worldwide Express Shipping</p></div>
@@ -81,7 +83,13 @@
                             <li><a href="{% url 'dashboard' %}">{{request.user.first_name}}</a></li>
                             <li><a href="{% url 'logout' %}">Logout</a></li>
                         {% endif %}
-                        <li><a href="wishlist.html">Wishlist</a></li>
+                        
+                        <li>
+                            <a href="{% url 'myWishList' %}" class="site-header__wishlist" title="Wishlist">
+                                <i class="icon anm anm-heart" aria-hidden="true"></i>
+                                <span id="WishlistCount" class="site-header__wishlist-count" data-wishlist-render="item_count">{{wishlist_count}}</span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -181,36 +189,27 @@
                             <i class="icon anm anm-bag-l"></i>
                             <span id="CartCount" class="site-header__cart-count" data-cart-render="item_count">{{items_count}}</span>
                         </a>
+                      
                         <!--Minicart Popup-->
                         <div id="header-cart" class="block block-cart">
-                            <ul class="mini-products-list">
+                            <ul class="mini-products-list list-unstyled">
                                 {% for item in cart_items %}
-                                    <li class="item">
+                                    <li class="item d-flex align-items-center">
                                         <a class="product-image" href="#">
-                                            <img src="{{ item.product.images.url }}" alt="{{ item.product.title }}" title="{{ item.product.title }}" />
+                                            <img src="{{ item.product.images.url }}" alt="{{ item.product.title }}" title="{{ item.product.title }}" class="img-fluid" />
                                         </a>
-                                        <div class="product-details">
-                                            <a href="{% url 'remove_cart' item.product.id %}" class="remove"><i class="anm anm-times-l" aria-hidden="true"></i></a>
-                                            <a class="edit-i remove"><i class="anm anm-edit" aria-hidden="true"></i></a>
+                                        <div class="product-details flex-grow-1 ms-3">
+                                            <a href="{% url 'remove_cart' product_id=item.product.id color=item.color size=item.size %}" class="remove">
+                                                <i class="anm anm-times-l" aria-hidden="true"></i>
+                                            </a>
                                             <a class="pName" href="#">{{ item.product.title }}</a>
-                                            <div class="variant-cart">{{ item.product.color }} / {{ item.product.size }}</div>
-                                            <div class="wrapQtyBtn">
-                                                <div class="qtyField">
-                                                    <span class="label">Qty:</span>
-                                                    <a class="qtyBtn minus" href="{% url 'minus_cart' item.product.id  %}"><i class="fa anm anm-minus-r" aria-hidden="true"></i></a>
-
-                                                    <input type="text" id="Quantity" name="quantity" value="{{ item.quantity }}" class="product-form__input qty">
-
-                                                    <a class="qtyBtn plus" href="{% url 'addToCart' item.product.id %}"><i class="fa anm anm-plus-r" aria-hidden="true"></i></a>
-                                                </div>
+                                            <div class="wrapQtyBtn d-flex align-items-center mt-2">
+                                                <span class="label me-2">Qty:</span>
+                                                <input type="text" id="Quantity" name="quantity" value="{{ item.quantity }}" class="form-control form-control-sm qty" readonly>
                                             </div>
-                                            <div class="priceRow">
+                                            <div class="priceRow mt-2">
                                                 <div class="product-price">
-                                                    <span class="money">${{ item.product.discount_amount|floatformat:2 }}</span>
-                                                </div>
-                                                <div class="subtotal">
-                                                    <span class="label">Subtotal:</span>
-                                                    <span class="money">${{item.total}}</span>
+                                                    <span class="money">${{ item.total|floatformat:2 }}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -219,14 +218,14 @@
                                     <li class="item">Your cart is empty.</li>
                                 {% endfor %}
                             </ul>
-                            <div class="total">
-                                <div class="total-in">
+                            <div class="total mt-3">
+                                <div class="total-in d-flex justify-content-between">
                                     <span class="label">Grand Total:</span>
                                     <span class="product-price"><span class="money">${{ grand_total|floatformat:2 }}</span></span>
                                 </div>
-                                <div class="buttonSet text-center">
-                                    <a href="{% url 'carts' %}" class="btn btn-secondary btn--small">View Cart</a>
-                                    <a href="checkout.html" class="btn btn-secondary btn--small">Checkout</a>
+                                <div class="buttonSet text-center mt-2">
+                                    <a href="{% url 'carts' %}" class="btn btn-secondary btn-sm">View Cart</a>
+                                    <a href="{% url 'checkout'%}" class="btn btn-secondary btn-sm">Checkout</a>
                                 </div>
                             </div>
                         </div>

@@ -834,20 +834,23 @@
                             <h2 class="section-header__title text-center h2"><span>Recently Viewed Product</span></h2>
                             <p class="sub-heading">You can manage this section from store admin as describe in above section</p>
                         </header>
+                        
                         <div class="productPageSlider">
+                            {% for recent in recently_viewed_products %}
                             <div class="col-12 item">
                                 <!-- start product image -->
                                 <div class="product-image">
+                                    
                                     <!-- start product image -->
-                                    <a href="#">
+                                    <a href="{% url 'store' %}">
                                         <!-- image -->
-                                        <img class="primary blur-up lazyload" data-src="{% static 'assets/images/product-images/product-image6.jpg' %}" src="assets/images/product-images/product-image6.jpg" alt="image" title="product">
+                                        <img class="primary blur-up lazyload" style="height: 186px;" data-src="{{recent.images.url}}" src="assets/images/product-images/product-image6.jpg" alt="image" title="product">
                                         <!-- End image -->
                                         <!-- Hover image -->
-                                        <img class="hover blur-up lazyload" data-src="{% static 'assets/images/product-images/product-image6-1.jpg' %}" src="assets/images/product-images/product-image6-1.jpg" alt="image" title="product">
+                                        <img class="hover blur-up lazyload" style="height: 186px;" data-src="{{recent.hoverImg.url}}" src="assets/images/product-images/product-image6-1.jpg" alt="image" title="product">
                                         <!-- End hover image -->
                                         <!-- product label -->
-                                        <div class="product-labels rectangular"><span class="lbl on-sale">-16%</span> <span class="lbl pr-label1">new</span></div>
+                                        <div class="product-labels rectangular"><span class="lbl on-sale">-{{recent.discount_percentage}}%</span> <span class="lbl pr-label1">{{recent.labels}}</span></div>
                                         <!-- End product label -->
                                     </a>
                                     <!-- end product image -->
@@ -858,118 +861,14 @@
                                 <div class="product-details text-center">
                                     <!-- product name -->
                                     <div class="product-name">
-                                        <a href="#">Zipper Jacket</a>
+                                        <a href="{% url 'store' %}">{{recent.title}}</a>
                                     </div>
                                     <!-- End product name -->
                                 </div>
                                 <!-- End product details -->
                             </div>
-                            <div class="col-12 item">
-                                <!-- start product image -->
-                                <div class="product-image">
-                                    <!-- start product image -->
-                                    <a href="#">
-                                        <!-- image -->
-                                        <img class="primary blur-up lazyload" data-src="{% static 'assets/images/product-images/product-image7.jpg' %}" src="assets/images/product-images/product-image7.jpg" alt="image" title="product">
-                                        <!-- End image -->
-                                        <!-- Hover image -->
-                                        <img class="hover blur-up lazyload" data-src="{% static 'assets/images/product-images/product-image7-1.jpg' %}" src="assets/images/product-images/product-image7-1.jpg" alt="image" title="product">
-                                        <!-- End hover image -->
-                                    </a>
-                                    <!-- end product image -->
-                                </div>
-                                <!-- end product image -->
-
-                                <!--start product details -->
-                                <div class="product-details text-center">
-                                    <!-- product name -->
-                                    <div class="product-name">
-                                        <a href="#">Zipper Jacket</a>
-                                    </div>
-                                    <!-- End product name -->
-                                </div>
-                                <!-- End product details -->
-                            </div>
-                            <div class="col-12 item">
-                                <!-- start product image -->
-                                <div class="product-image">
-                                    <!-- start product image -->
-                                    <a href="#">
-                                        <!-- image -->
-                                        <img class="primary blur-up lazyload" data-src="{% static 'assets/images/product-images/product-image8.jpg' %}" src="assets/images/product-images/product-image8.jpg" alt="image" title="product">
-                                        <!-- End image -->
-                                        <!-- Hover image -->
-                                        <img class="hover blur-up lazyload" data-src="{% static 'assets/images/product-images/product-image8-1.jpg' %}" src="assets/images/product-images/product-image8-1.jpg" alt="image" title="product">
-                                        <!-- End hover image -->
-                                    </a>
-                                    <!-- end product image -->
-                                </div>
-
-                                <!-- end product image -->
-
-                                <!--start product details -->
-                                <div class="product-details text-center">
-                                    <!-- product name -->
-                                    <div class="product-name">
-                                        <a href="#">Workers Shirt Jacket</a>
-                                    </div>
-                                    <!-- End product name -->
-                                </div>
-                                <!-- End product details -->
-                            </div>
-                            <div class="col-12 item">
-                                <!-- start product image -->
-                                <div class="product-image">
-                                    <!-- start product image -->
-                                    <a href="#">
-                                        <!-- image -->
-                                        <img class="primary blur-up lazyload" data-src="{% static 'assets/images/product-images/product-image9.jpg' %}" src="assets/images/product-images/product-image9.jpg" alt="image" title="product">
-                                        <!-- End image -->
-                                        <!-- Hover image -->
-                                        <img class="hover blur-up lazyload" data-src="{% static 'assets/images/product-images/product-image9-1.jpg' %}" src="assets/images/product-images/product-image9-1.jpg" alt="image" title="product">
-                                        <!-- End hover image -->
-                                    </a>
-                                    <!-- end product image -->
-                                </div>
-                                <!-- end product image -->
-
-                                <!--start product details -->
-                                <div class="product-details text-center">
-                                    <!-- product name -->
-                                    <div class="product-name">
-                                        <a href="#">Watercolor Sport Jacket in Brown/Blue</a>
-                                    </div>
-                                    <!-- End product name -->
-                                </div>
-                                <!-- End product details -->
-                            </div>
-                            <div class="col-12 item">
-                                <!-- start product image -->
-                                <div class="product-image">
-                                    <!-- start product image -->
-                                    <a href="#">
-                                        <!-- image -->
-                                        <img class="primary blur-up lazyload" data-src="{% static 'assets/images/product-images/product-image10.jpg' %}" src="assets/images/product-images/product-image10.jpg" alt="image" title="product">
-                                        <!-- End image -->
-                                        <!-- Hover image -->
-                                        <img class="hover blur-up lazyload" data-src="{% static 'assets/images/product-images/product-image10-1.jpg' %}" src="assets/images/product-images/product-image10-1.jpg" alt="image" title="product">
-                                        <!-- End hover image -->
-                                    </a>
-                                    <!-- end product image -->
-                                </div>
-                                <!-- end product image -->
-
-                                <!--start product details -->
-                                <div class="product-details text-center">
-                                    <!-- product name -->
-                                    <div class="product-name">
-                                        <a href="#">Washed Wool Blazer</a>
-                                    </div>
-                                    <!-- End product name -->
-                                </div>
-                                <!-- End product details -->
-                            </div>
-                           
+                            {% endfor %}
+                            
                         </div>
                     </div>
                 <!--End Recently Product Slider-->

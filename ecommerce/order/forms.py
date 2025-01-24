@@ -7,7 +7,7 @@ class OrderForm(forms.ModelForm):
         fields = (
             'first_name', 'last_name', 'phone', 'email', 
             'address_line_1', 'address_line_2', 
-            'country', 'state', 'city', 'order_note'
+            'country', 'state', 'city', 'order_note','cash_on_delivery'
         )
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter first name'}),

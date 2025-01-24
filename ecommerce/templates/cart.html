@@ -13,9 +13,32 @@
           </div>
     </div>
     <!--End Page Title-->
-    
+
     <div class="container">
         <div class="row">
+            <div class="col-12 col-sm-12 col-md-8 col-lg-8 main-col">
+                {% if messages %}
+                <div id="message" class="alert alert-success text-center">
+                    {% for message in messages %}
+                    <div class="alert-message">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                <script>
+                    window.onload = function() {
+                        setTimeout(function() {
+                            var messageDiv = document.getElementById('message');
+                            if (messageDiv) {
+                                messageDiv.style.display = 'none'; // Hide the message after 4 seconds
+                            }
+                        }, 4000); // 4000 milliseconds = 4 seconds
+                    };
+                </script>
+                {% endif %}
+            </div>
+        </div>
+    <div class="container">
+        <div class="row">
+                        
             <div class="col-12 col-sm-12 col-md-8 col-lg-8 main-col">
                 <form action="#" method="post" class="cart style2">
                     <table>
@@ -76,8 +99,9 @@
                                 <td class="text-right small--hide cart-price">
                                     <div><span class="money">${{ item.sub_total }}</span></div>
                                 </td>
+                                
                                 <td class="text-center small--hide">
-                                    <form method="POST" action="{% url 'remove_cart' item.product.id %}">
+                                    <form method="POST" action="{% url 'remove_cart' product_id=item.product.id color=item.color size=item.size  %}">
                                         {% csrf_token %}
                                         <input type="hidden" name="color" value="{{ item.color }}">
                                         <input type="hidden" name="size" value="{{ item.size }}">
@@ -105,40 +129,71 @@
                             </tr>
                         </tfoot>
                     </table>
-                <div class="currencymsg">We processes all orders in USD. While the content of your cart is currently displayed in USD, the checkout will use USD at the most current exchange rate.</div>
+                 <div class="currencymsg">We processes all orders in USD. While the content of your cart is currently displayed in USD, the checkout will use USD at the most current exchange rate.</div>
                 
                 
-                </form>                   
-               </div>
-            <div class="col-12 col-sm-12 col-md-4 col-lg-4 cart__footer">
-                
-                <div class="solid-border">
-                    <div class="row">
-                        <span class="col-12 col-sm-6 cart__subtotal-title"><strong>TAX</strong></span>
-                        <span class="col-12 col-sm-6 cart__subtotal-title cart__subtotal text-right">
-                            <span class="money">{{ tax }}</span>
-                        </span>
-                    </div>
-                    <div class="row">
-                        <span class="col-12 col-sm-6 cart__subtotal-title"><strong>Grand Total</strong></span>
-                        <span class="col-12 col-sm-6 cart__subtotal-title cart__subtotal text-right">
-                            <span class="money">${{ grand_total }}</span>
-                        </span>
-                    </div>
-                    <div class="cart__shipping">Shipping &amp; taxes calculated at checkout</div>
-                    <p class="cart_tearm">
-                        <label>
-                            <input type="checkbox" name="tearm" id="cartTearm" class="checkbox" value="tearm" required
-                            I agree with the terms and conditions
-                        </label>
-                    </p>
-                    <div class="text-align-center"> <!-- Center the button -->
-                        <a href="{% url 'checkout' %}" class="btn btn-outline-primary d-flex btn-block">Checkout</a>
-                    </div>
-                    <div class="paymnet-img">
-                        <img src="{% static 'assets/images/payment-img.jpg' %}" alt="Payment">
-                    </div>
+             </form>                   
             </div>
+
+            <div class="col-12 col-sm-12 col-md-4 col-lg-4 cart__footer" style="background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 20px; border-radius: 5px;">
+    <div class="solid-border">
+        <!-- Coupon section -->
+        <div class="card-body">
+            <div class="customer-box customer-coupon">
+                <h5 class="font-weight-bold" style="font-size: 1.5rem; color: #d57070;">
+                    <i class="icon anm anm-gift-l"></i>
+                    Have a coupon?
+                    <a href="#have-coupon" class="btn btn-outline-primary d-flex btn-block" style="border-color: #8fbae8; color: #92c2f6;" data-toggle="collapse" style="color: #007bff; font-weight: bold; font-size: 1.2rem;"> 
+                        CLICK HERE TO ENTER YOUR CODE
+                    </a>
+                </h5>
+                <div id="have-coupon" class="collapse coupon-checkout-content mt-4">
+                    <div class="discount-coupon" style="background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 5px; padding: 15px;">
+                        <p class="mb-2" style="font-size: 1rem; color: #666;">Enter your coupon code if you have one.</p>
+                        <label class="required" for="coupon-code" style="font-weight: bold;">
+                            <span class="required-f">*</span> Coupon Code
+                        </label>
+                        <form action="" method="POST">
+                            {% csrf_token %}
+                            <input id="coupon-code" required type="text" name="promo_code" class="form-control mb-3" placeholder="Enter your coupon code" style="border: 1px solid #ced4da; border-radius: 5px;">
+                            <button class="btn btn-success w-100" type="submit" style="background-color: #28a745; color: white; font-weight: bold;">Apply Coupon</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Coupon section -->
+
+        <div class="row mt-3">
+            <div class="col-12 col-sm-6 cart__subtotal-title"><strong>TAX</strong></div>
+            <div class="col-12 col-sm-6 cart__subtotal-title cart__subtotal text-right">
+                <span class="money">{{ tax }}</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-sm-6 cart__subtotal-title"><strong>Grand Total</strong></div>
+            <div class="col-12 col-sm-6 cart__subtotal-title cart__subtotal text-right">
+                <span class="money">${{ grand_total|floatformat:2 }}</span>
+            </div>
+        </div>
+        <div class="cart__shipping">Shipping &amp; taxes calculated at checkout</div>
+        
+        <p class="cart_tearm mt-3">
+            <label>
+                <input type="checkbox" name="tearm" id="cartTearm" class="checkbox" value="tearm" required>
+                I agree with the terms and conditions
+            </label>
+        </p>
+
+        <div class="text-align-center mt-3"> <!-- Center the button -->
+            <a href="{% url 'checkout' %}" class="btn btn-outline-primary d-flex btn-block" style="border-color: #8fbae8; color: #8fbae8;">Checkout</a>
+        </div>
+
+        <div class="payment-img mt-3">
+            <img src="{% static 'assets/images/payment-img.jpg' %}" alt="Payment" class="img-fluid">
+        </div>
+    </div>
+</div>
         </div>
     </div>
     

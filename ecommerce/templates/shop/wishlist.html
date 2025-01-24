@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <!-- Body Content -->
+    <div id="page-content">
+        <!-- Page Title -->
+        <div class="page section-header text-center">
+            <div class="page-title">
+                <div class="wrapper"><h1 class="page-width">Wish List</h1></div>
+            </div>
+        </div>
+        <!-- End Page Title -->
+        
+        <div class="container">
+            <div class="row">
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12 main-col">
+                    <div class="wishlist-table table-content table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th class="product-name text-center alt-font">Remove</th>
+                                    <th class="product-price text-center alt-font">Images</th>
+                                    <th class="product-name alt-font">Product</th>
+                                    <th class="product-price text-center alt-font">Unit Price</th>
+                                    <th class="stock-status text-center alt-font">Stock Status</th>
+                                    <th class="product-subtotal text-center alt-font">View Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in wishlist_items %}
+                                <tr>
+                                    <td class="product-remove text-center" valign="middle">
+                                        <a href="{% url 'remove_from_wishlist' item.id %}">
+                                            <i class="icon icon anm anm-times-l"></i>
+                                        </a>
+                                    </td>
+                                    <td class="product-thumbnail text-center">
+                                        <a href="#"><img src="{{ item.wish_product.images.url }}" alt="{{ item.wish_product.title }}" /></a>
+                                    </td>
+                                    <td class="product-name">
+                                        <h4 class="no-margin"><a href="#">{{ item.wish_product.title }}</a></h4>
+                                    </td>
+                                    <td class="product-price text-center"><span class="amount">${{ item.wish_product.price }}</span></td>
+                                    <td class="stock text-center">
+                                        <span >
+                                            {% if item.wish_product.stock %}In Stock{% else %}Out Of Stock{% endif %}
+                                        </span>
+                                    </td>
+                                    <td class="product-subtotal text-center">
+                                        <a href="{% url 'productDetails' item.wish_product.category.slug item.wish_product.slug %}">
+                                            <button type="button" class="btn btn-small">View Details</button>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">Your wishlist is empty.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+
+                        </table>
+                    </div>                   
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Body Content -->
+{% endblock %}

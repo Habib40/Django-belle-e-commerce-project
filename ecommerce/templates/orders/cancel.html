@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="section-content padding-y bg">
+    <div class="container">
+        <h2 class="text-center">Payment Failed</h2>
+        <div class="alert alert-danger text-center">
+            <p>We're sorry, but your payment could not be processed.</p>
+            <p>Please check your card details and try again.</p>
+        </div>
+        <a href="{% url 'store' %}" class="btn btn-outline-primary">Return to Shopping</a>
+        {% if order %}
+            <a href="{% url 'payments' order.id %}" class="btn btn-outline-warning">Try Again</a>
+        {% else %}
+        <a href="{% url 'store' %}" class="btn btn-outline-warning">Try Again</a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -4,147 +4,152 @@
 {% block content %}
 <section class="section-content padding-y bg">
     <div class="container">
-
-        <!-- ============================ COMPONENT 1 ================================= -->
         <h4 class="text-center mb-10">Review Your Order And Make Payment</h4>
-        <div class="row">
-            <aside class="col-lg-8">
-                <div class="card">
-                    <div class="card-header">
-                        Billing Address
+        <form method="POST" action="{% url 'payments' order.id %}">  <!-- Make sure the action points to the correct view -->
+            {% csrf_token %}
+            <div class="row">
+                <aside class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">Billing Address</div>
+                        <div class="card-body">
+                            <p class="card-text mb-0">{{ order.first_name }} {{ order.last_name }}</p>
+                            <p class="card-text mb-0">{{ order.address_line_1 }}</p>
+                            {% if order.address_line_2 %}
+                            <p class="card-text mb-0">{{ order.address_line_2 }}</p>
+                            {% endif %}
+                            <p class="card-text mb-0">{{ order.state }}, {{ order.city }}</p>
+                            <p class="card-text mb-0">{{ order.country }}</p>
+                            <p class="card-text mb-0">{{ order.email }}</p>
+                            <p class="card-text mb-0">{{ order.phone }}</p>
+                            {% if order.order_note %}
+                            <b>Order Note: {{ order.order_note }}</b>
+                            {% endif %}
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <p class="card-text mb-0">{{ order.first_name }} {{ order.last_name }}</p>
-                        <p class="card-text mb-0">{{ order.address_line_1 }}</p>
-                        {% if order.address_line_2 %}
-                        <p class="card-text mb-0">{{ order.address_line_2 }}</p>
-                        {% endif %}
-                        <p class="card-text mb-0">{{ order.state }}, {{ order.city }}</p>
-                        <p class="card-text mb-0">{{ order.country }}</p>
-                        <p class="card-text mb-0">{{ order.email }}</p>
-                        <p class="card-text mb-0">{{ order.phone }}</p>
-                        {% if order.order_note %}
-                        <b>Order Note: {{ order.order_note }}</b>
-                        {% endif %}
-                    </div>
-                </div>
-                <br>
-                <div class="card">
-                    <div class="card-header">
-                        Payment Methods
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">PayPal</p>
-                    </div>
-                </div>
-                <br>
-                <div class="card">
-                    <div class="card-header">
-                        Review Products
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-borderless table-shopping-cart">
-                            <thead class="text-muted">
-                                <tr class="small text-uppercase">
-                                    <th scope="col">Product</th>
-                                    <th scope="col" width="120">Quantity</th>
-                                    <th scope="col" width="120">Price</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                             {% for order_product in order_products %}
-                                <tr>
-                                    <td>
-                                        <figure class="itemside align-items-center">
-                                            <a href="{{ order_product.product.get_url }}" class="title text-dark">
-                                                <h5 class="mb-0">{{ order_product.product.title }}</h5>
-                                            </a>
-                                            <div class="aside">
-                                                <img src="{{ order_product.product.images.url }}" class="img-sm" alt="{{ order_product.product.title }}">
+                    <br>
+                    <div class="card">
+                        <div class="card-header">Review Products</div>
+                        <div class="card-body">
+                            <table class="table table-borderless table-shopping-cart">
+                                <thead class="text-muted">
+                                    <tr class="small text-uppercase">
+                                        <th scope="col">Product</th>
+                                        <th scope="col" width="120">Quantity</th>
+                                        <th scope="col" width="120">Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order_product in order_products %}
+                                    <tr>
+                                        <td>
+                                            <figure class="itemside align-items-center">
+                                                <a href="{{ order_product.product.get_url }}" class="title text-dark">
+                                                    <h5 class="mb-0">{{ order_product.product.title }}</h5>
+                                                </a>
+                                                <div class="aside">
+                                                    <img src="{{ order_product.product.images.url }}" class="img-sm" style="height:100px;width:150;" alt="{{ order_product.product.title }}">
+                                                </div>
+                                            </figure>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="col">
+                                                <label class="mb-0">{{ order_product.quantity }}</label>
                                             </div>
-                                            <figcaption class="info">
-                                                <p class="text-muted small mb-0">
-                                                    {% if order_product.color %}
-                                                        <span class="d-block">Color: {{ order_product.color }}</span>
-                                                    {% endif %}
-                                                    {% if order_product.size %}
-                                                        <span class="d-block">Size: {{ order_product.size }}</span>
-                                                    {% endif %}
-                                                </p>
-                                                <hr>
-                                            </figcaption>
-                                        </figure>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="col">
-                                            <label class="mb-0">{{ order_product.quantity }}</label>
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="col">
-                                            Unit Price: ${{ order_product.discount_amount }}  <!-- Use product_price -->
-                                            <!-- <br>
-                                            Sub Total: ${{ subtotal}} -->
-                                        </div>
-                                    </td>
-                                </tr>
-                               
-                                {% endfor %}
-                            </tbody>
-                            <hr>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="2" class="text-right">
-                                        <div class="price-wrap"> 
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="col">
+                                                Unit Price: ${{ order_product.discount_amount|floatformat:2 }}<br>
+                                                Sub Total: ${{ order_product.sub_total|floatformat:2 }}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="2" class="text-right">
                                             <strong>Grand Total With Tax:</strong>
-                                            <hr>
-                                            <var class="price">$ {{ grand_total }}</var>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
-            </aside> <!-- col.// -->
-            <aside class="col-lg-4">
-                <div class="card" style="padding: 20px;">
-                    <div class="solid-border">
-                        <div class="row">
-                            <span class="col-12 col-sm-6 cart__subtotal-title"><strong>TAX</strong></span>
-                            <span class="col-12 col-sm-6 cart__subtotal-title cart__subtotal text-right">
-                                <span class="money">${{ tax }}</span>
-                            </span>
-                        </div>
-                        <div class="row">
-                            <span class="col-12 col-sm-6 cart__subtotal-title"><strong>Grand Total</strong></span>
-                            <span class="col-12 col-sm-6 cart__subtotal-title cart__subtotal text-right">
-                                <span class="money">${{ grand_total }}</span>
-                            </span>
-                        </div>
-                        <div class="cart__shipping">Shipping &amp; taxes calculated at checkout</div>
-                        <p class="cart_tearm">
-                            <label>
-                                <input type="checkbox" name="tearm" id="cartTearm" class="checkbox" value="tearm" required>
-                                I agree with the terms and conditions
-                            </label>
-                        </p>
-                        <div class="text-align-center">
-                            <a href="#" class="btn btn-outline-primary d-flex btn-block">Make Payment</a>
-                        </div>
-                        <hr>
-                        <div class="text-align-center">
-                            <a href="{% url 'store' %}" class="btn btn-outline-primary d-flex btn-block">Continue Shopping</a>
-                        </div>
-                        <div class="paymnet-img">
-                            <img src="{% static 'assets/images/payment-img.jpg' %}" alt="Payment">
+                                            <var class="price">$ {{ grand_total|floatformat:2 }}</var>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
                         </div>
                     </div>
-                </div> <!-- card.// -->
-            </aside> <!-- col.// -->
-        </div> <!-- row.// -->
-        <!-- ============================ COMPONENT 1 END .// ================================= -->
-    </div> <!-- container .//  -->
+                </aside>
+                <aside class="col-lg-4">
+                    <div class="card" style="padding: 20px;">
+                        <div class="solid-border">
+                            <div class="row">
+                                <span class="col-12 col-sm-6 cart__subtotal-title"><strong>TAX</strong></span>
+                                <span class="col-12 col-sm-6 cart__subtotal-title cart__subtotal text-right">
+                                    <span class="money">${{ tax }}</span>
+                                </span>
+                            </div>
+                            <div class="row">
+                                <span class="col-12 col-sm-6 cart__subtotal-title"><strong>Grand Total</strong></span>
+                                <span class="col-12 col-sm-6 cart__subtotal-title cart__subtotal text-right">
+                                    <span class="money">${{ grand_total }}</span>
+                                </span>
+                            </div>
+                            <div class="cart__shipping">Shipping &amp; taxes calculated at checkout</div>
+                            <p class="cart_tearm">
+                                <label>
+                                    <input type="checkbox" name="tearm" id="cartTearm" class="checkbox" value="tearm" required>
+                                    I agree with the terms and conditions
+                                </label>
+                            </p>
+                            <div class="d-flex justify-content-between mt-3">
+                                <!-- Cash on Delivery Button -->
+                                <button type="submit" name="payment_method" value="cash_on_delivery" class="btn btn-outline-secondary me-2">Cash on Delivery</button>
+                                
+                                <!-- Make Payment Button -->
+                                <a href="{% url 'create_payment' order.id %}" class="btn btn-outline-success me-2">Make Payment</a>
+
+                                <!-- <input type="hidden" name="order_id" value="{{ order.id }}">
+                                <input type="hidden" name="success_url" value="{{ success_url }}">
+                                <input type="hidden" name="cancel_url" value="{{ cancel_url }}">
+                                <button type="button" id="proceedPayment" class="btn btn-primary">Proceed to Payment</button> -->
+                            </div>
+                            <hr>
+                            <div class="text-align-center">
+                                <a href="{% url 'store' %}" class="btn btn-outline-primary d-flex btn-block">Continue Shopping</a>
+                            </div>
+                            <div class="paymnet-img">
+                                <img src="{% static 'assets/images/payment-img.jpg' %}" alt="Payment">
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </form>
+        <!-- <script>
+            document.getElementById('proceedPayment').addEventListener('click', function() {
+                const orderId = document.querySelector('input[name="order_id"]').value;
+                const myHeaders = new Headers();
+                myHeaders.append("Cookie", "csrftoken={{ csrf_token }}; sessionid={{ request.session.session_key }}");
+        
+                const requestOptions = {
+                    method: "POST",
+                    headers: myHeaders,
+                    redirect: "follow",
+                    body: new URLSearchParams(new FormData(document.getElementById('paymentForm')))
+                };
+        
+                fetch(`/orders/create-payment/${orderId}/`, requestOptions)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.status === 1 && data.payment_url) {
+                            // Redirect to the payment URL
+                            window.location.href = data.payment_url;
+                        } else {
+                            console.error('Error fetching payment link:', data.message);
+                        }
+                    })
+                    .catch((error) => console.error('Error:', error));
+            });
+        </script> -->
+    
+    </div>
 </section>
-<!-- ========================= SECTION CONTENT END// ========================= -->
 {% endblock %}

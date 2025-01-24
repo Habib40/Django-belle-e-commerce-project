@@ -11,8 +11,15 @@ STEADFAST_API_KEY = os.getenv("STEADFAST_API_KEY")
 STEADFAST_SECRET_KEY = os.getenv("STEADFAST_SECRET_KEY")
 STEADFAST_BASE_URL = os.getenv("STEADFAST_BASE_URL")
 APIK_KEY = f"This is APIKEY  {STEADFAST_API_KEY} from SteadFast"
-print(STEADFAST_SECRET_KEY)
-print(APIK_KEY)
+
+# STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
+# STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+
+
+IT_PAY_BD_API_KEY = os.getenv("IT_PAY_BD_API_KEY")
+# print(f"This is STRIPE_PUBLISHABLE_KEY " ,STRIPE_PUBLISHABLE_KEY)
+# print(f"This is STRIPE_SECRET_KEY ",STRIPE_SECRET_KEY)
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -74,6 +81,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'cart.context_processors.cart_context',  # Add your context processor here
                 'category.context_processors.menue_links',
+                'shop.context_processors.wishlist_items',
             ],
         },
     },
@@ -152,3 +160,12 @@ EMAIL_HOST_USER = 'habibkb5080@gmail.com'
 EMAIL_HOST_PASSWORD = 'fgzzzljvhqrnctkn'
 
 PASSWORD_RESET_TOKEN_GENERATOR = 'django.contrib.auth.tokens.PasswordResetTokenGenerator'
+
+
+
+ALLOWED_HOSTS = ['*']
+
+# Also add CSRF settings
+CSRF_TRUSTED_ORIGINS = ['https://*', 'http://*']  # Be more specific in production
+CORS_ALLOW_ALL_ORIGINS = True  # For django-cors-headers
+CORS_ORIGIN_ALLOW_ALL = True

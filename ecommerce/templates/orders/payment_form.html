@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Form</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Payment for Order</h2>
+        <form id="paymentForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="cus_name">Customer Name</label>
+                <input type="text" class="form-control" id="cus_name" name="cus_name" value="{{ cus_name }}" readonly>
+            </div>
+            <div class="form-group">
+                <label for="cus_email">Customer Email</label>
+                <input type="email" class="form-control" id="cus_email" name="cus_email" value="{{ cus_email }}" readonly>
+            </div>
+            <div class="form-group">
+                <label for="amount">Amount</label>
+                <input type="number" class="form-control" id="amount" name="amount" value="{{ amount }}" readonly>
+            </div>
+            <input type="hidden" name="order_id" value="{{ order.id }}">
+            <input type="hidden" name="success_url" value="{{ success_url }}">
+            <input type="hidden" name="cancel_url" value="{{ cancel_url }}">
+            <button type="button" id="proceedPayment" class="btn btn-primary">Proceed to Payment</button>
+            <a href="{{ cancel_url }}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Payment Processing Script -->
+    <script>
+        document.getElementById('proceedPayment').addEventListener('click', async function() {
+            const orderId = document.querySelector('input[name="order_id"]').value;
+
+            // Create headers including CSRF token
+            const csrfToken = document.querySelector('input[name=csrfmiddlewaretoken]').value;
+            const myHeaders = new Headers({
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": csrfToken
+            });
+
+            // Prepare request options
+            const requestOptions = {
+                method: "POST",
+                headers: myHeaders,
+                body: new URLSearchParams(new FormData(document.getElementById('paymentForm')))
+            };
+
+            try {
+                const response = await fetch(`/orders/create-payment/${orderId}/`, requestOptions);
+                const data = await response.json();
+
+                if (data.status === 1 && data.payment_url) {
+                    // Redirect to the payment URL
+                    window.location.href = data.payment_url;
+                } else {
+                    console.error('Error fetching payment link:', data.message);
+                    alert(`Error: ${data.message}`); // Alert user about the error
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An unexpected error occurred. Please try again later.');
+            }
+        });
+    </script>
+
+</body>
+</html>
+
+
+                    <!-- --------------------------------- -->
+<!-- ------------------------------------------------------------------------------------- -->
+                    <!-- --------------------------------- -->
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Form</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Payment for Order</h2>
+        <form id="paymentForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="cus_name">Customer Name</label>
+                <input type="text" class="form-control" id="cus_name" name="cus_name" value="{{ cus_name }}" readonly>
+            </div>
+            <div class="form-group">
+                <label for="cus_email">Customer Email</label>
+                <input type="email" class="form-control" id="cus_email" name="cus_email" value="{{ cus_email }}" readonly>
+            </div>
+            <div class="form-group">
+                <label for="amount">Amount</label>
+                <input type="number" class="form-control" id="amount" name="amount" value="{{ amount }}" readonly>
+            </div>
+            <input type="hidden" name="order_id" value="{{ order.id }}">
+            <input type="hidden" name="success_url" value="{{ success_url }}">
+            <input type="hidden" name="cancel_url" value="{{ cancel_url }}">
+            <button type="button" id="proceedPayment" class="btn btn-primary">Proceed to Payment</button>
+            <a href="{{ cancel_url  }}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <script>
+        document.getElementById('proceedPayment').addEventListener('click', function() {
+            const orderId = document.querySelector('input[name="order_id"]').value;
+            const myHeaders = new Headers();
+            myHeaders.append("Cookie", "csrftoken={{ csrf_token }}; sessionid={{ request.session.session_key }}");
+    
+            const requestOptions = {
+                method: "POST",
+                headers: myHeaders,
+                redirect: "follow",
+                body: new URLSearchParams(new FormData(document.getElementById('paymentForm')))
+            };
+    
+            fetch(`/orders/create-payment/${orderId}/`, requestOptions)
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.status === 1 && data.payment_url) {
+                        // Redirect to the payment URL
+                        window.location.href = data.payment_url;
+                    } else {
+                        console.error('Error fetching payment link:', data.message);
+                    }
+                })
+                .catch((error) => console.error('Error:', error));
+        });
+    </script>
+
+</body>
+</html> -->

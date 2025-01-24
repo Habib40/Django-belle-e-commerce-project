@@ -7,6 +7,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 from datetime import datetime, timedelta
 from django.urls import reverse
+from account.models import Account
 
 
 # Define product labels
@@ -170,6 +171,17 @@ class ProductImage(models.Model):
     def __str__(self):
         return f'Image for {self.product.title}'
 
+class WishList(models.Model):
+    user =models.ForeignKey(Account,on_delete=models.CASCADE,null=True)
+    wish_product = models.ForeignKey(Product,on_delete=models.CASCADE,null=True)
+    
+    
+    def __str__(self):
+        return f"{self.user.username}'s wishlist -{self.wish_product.title}"
+    
+    class Meta:
+        verbose_name = 'Wish List' # Singular form
+        
 
 
     

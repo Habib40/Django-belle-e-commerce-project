@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect,get_object_or_404 ,HttpResponse
 import requests
 
 from django.db.models import Avg  # Import Avg here
-from .models import Product,Review,ProductColor
+from .models import Product,Review,ProductColor,WishList
 from .forms import ReviewForm
 from django.contrib import messages
 from decimal import Decimal
@@ -11,6 +11,7 @@ from category .models import Category
 from django.http import HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
 
@@ -53,9 +54,27 @@ def ProductDetail(request, category_slug, product_slug):
     # Initialize variables for savings and discount percentage
     savings = 0
     discount_percentage = 0
-
     # Get the product or return a 404 error if it doesn't exist
     products = get_object_or_404(Product, category__slug=category_slug, slug=product_slug)
+    # Handle recently viewed products
+    recently_viewed_products = []
+    if 'recently_viewed' in request.session:
+        # Directly use the IDs from the session, assuming they are integers
+        recently_viewed_ids = request.session['recently_viewed']
+        recently_viewed_products = Product.objects.filter(id__in=recently_viewed_ids)
+    
+    # Add the current product to the recently viewed list
+    if products.id not in request.session.get('recently_viewed', []):
+        # Limit the number of recently viewed products (e.g., 5)
+        recent_products = request.session.get('recently_viewed', [])
+        recent_products.append(products.id)
+        if len(recent_products) > 5:
+            recent_products.pop(0)  # Remove the oldest viewed product
+        request.session['recently_viewed'] = recent_products
+        
+        
+    print('recently_viewed_products')
+
 
     # Now filter ProductColor based on the product instance
     product_color = ProductColor.objects.filter(product=products)
@@ -117,11 +136,46 @@ def ProductDetail(request, category_slug, product_slug):
         'average_rating': average_rating,
         'review_count': review_count,
         'discount_percentage': round(discount_percentage),
+        'recently_viewed_products': (recently_viewed_products),
+        
     }
 
     return render(request, 'shop/productDetail.html', context)
 
 
+def WishListView(request):
+    current_user = request.user
+    if current_user.is_authenticated:
+        wishlist_items = WishList.objects.filter(user=current_user)
+        messages.info(request,f"{current_user.username} has {wishlist_items.count()} items in their wishList")
+    else:
+        wishlist_items = []
+    context={
+        'wishlist_items':wishlist_items
+    }
+   
+    return render(request, 'shop/wishlist.html',context)
+
+
+@login_required
+def add_to_wishlist(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    # Check if the product is already in the user's wishlist
+    wishlist_item, created = WishList.objects.get_or_create(user=request.user, wish_product=product)
+
+    if created:
+        messages.success(request, f"{product.title} has been added to your wishlist.")
+    else:
+        messages.info(request, f"{product.title} is already in your wishlist.")
+
+    return redirect('myWishList')  # Redirect to the wishlist page
+
+@login_required
+def remove_from_wishlist(request, item_id):
+    item = get_object_or_404(WishList, id=item_id)
+    item.delete()
+    messages.success(request, "Item removed from your wishlist.")
+    return redirect('myWishList')
 
 
 def LoadProducts(request):
