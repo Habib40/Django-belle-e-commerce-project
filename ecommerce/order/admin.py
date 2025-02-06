@@ -4,8 +4,8 @@ from .models import Order,OrderProduct,Payment
 # Register your models here.
 class OrderAdmin(admin.ModelAdmin):
     list_display = (
-        'order_number', 'payment_method','cash_on_delivery', 'full_name', 'email', 
-        'order_total', 'status', 'created_at', 'payment_link'
+        'order_number', 'get_payment_id', 'get_payment_method', 'cash_on_delivery',
+        'full_name', 'email', 'order_total', 'status', 'created_at',
     )
     search_fields = ('order_number', 'user__first_name', 'user__last_name', 'email')
     list_filter = ('status', 'created_at', 'country')
@@ -13,7 +13,7 @@ class OrderAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at', 'ip')
 
     fields = (
-        'user', 'payment', 'payment_method', 'order_number', 
+        'user', 'payment', 'order_number', 
         'first_name', 'last_name', 'phone', 'email', 
         'address_line_1', 'address_line_2', 'country', 
         'state', 'city', 'order_note', 'order_total', 
@@ -21,23 +21,19 @@ class OrderAdmin(admin.ModelAdmin):
     )
 
     def full_name(self, obj):
-        if obj.user:
-            return f"{obj.user.first_name} {obj.user.last_name}"
-        return "No User"
+        return f"{obj.user.first_name} {obj.user.last_name}" if obj.user else "No User"
     full_name.short_description = 'Full Name'
 
-   
+    def get_payment_id(self, obj):
+        return obj.payment.payment_id if obj.payment else "No Payment"
+    get_payment_id.short_description = 'Payment ID'
 
-    def payment_link(self, obj):
-        return obj.payment.get_absolute_url() if obj.payment else "No Payment"
-    payment_link.short_description = 'Payment'
+    def get_payment_method(self, obj):
+        return obj.payment.payment_method if obj.payment else "No Payment"
+    get_payment_method.short_description = 'Payment Method'
 
 admin.site.register(Order, OrderAdmin)
 
-
-from django.contrib import admin
-from django.utils.html import format_html  # Importing format_html
-from .models import OrderProduct
 
 class OrderProductAdmin(admin.ModelAdmin):
     list_display = (

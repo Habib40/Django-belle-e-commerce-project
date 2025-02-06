@@ -12,6 +12,7 @@ from django.http import HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
+from django.utils.text import slugify
 # Create your views here.
 
 
@@ -179,22 +180,38 @@ def remove_from_wishlist(request, item_id):
 
 
 def LoadProducts(request):
-     r  = requests.get('https://fakestoreapi.com/products')
-     
-     print(r.json())
-     for item in r.json():
-        
-         product = Product(
-             title = item['title'],
-             description = item['description'],
-             price = item['price'],
-             images = item['image'],
-             ratings=item['rating']['rate'],  # Average rating
-             is_available=item['rating']['count'],  # Number of ratings    
-         )
-         product.save()
-         
-         return HttpResponse()
-         
+    try:
+        response = requests.get('https://fakestoreapi.com/products')
+        response.raise_for_status()  # Raise an error for bad responses
+    except requests.exceptions.RequestException as e:
+        return HttpResponse(f"An error occurred: {e}")
+
+    products_data = response.json()
+
+    for item in products_data:
+        # Get or create the category
+        category, created = Category.objects.get_or_create(name=item['category'])
+
+        # Create a new product instance
+        product = Product(
+            title=item['title'],
+            slug=slugify(item['title']),  # Generate slug from title
+            description=item['description'],
+            price=item['price'],
+            ratings_count=item['rating']['count'],
+            sku=f'sku-{item["id"]}',  # Generate a unique SKU
+            category=category,
+            stock=1,  # Set stock as appropriate (update logic as needed)
+            is_available=item['rating']['count'] > 0,  # Example logic for availability
+            images=item['image'],  # Handle this appropriately if saving to ImageField
+            # Add other fields as needed, defaults or null if applicable
+        )
+
+        try:
+            product.save()  # Save the product instance
+        except Exception as e:
+            print(f"Failed to save product {item['title']}: {e}")
+
+    return HttpResponse("Products loaded successfully.")
    
      

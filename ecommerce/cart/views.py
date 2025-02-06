@@ -1,6 +1,8 @@
 from django.shortcuts import render,render,redirect ,HttpResponse,get_object_or_404
 from shop.models import Product,ProductColor,WishList
-from.models import Cart,CartItem,Promotion
+from promotions.models import AppliedPromotion
+from.models import Cart,CartItem
+from promotions.models import Promotion
 from django.http import Http404
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
@@ -10,7 +12,7 @@ import uuid
 from django.contrib.auth.decorators import login_required
 import logging
 from decimal import Decimal
-from order.models import OrderProduct
+from order.models import OrderProduct,Order
 
 logger = logging.getLogger(__name__)
 
@@ -191,108 +193,15 @@ def Remove_cart(request, product_id, color, size):
 
 
 
-def CartPage(request, total=0, quantity=0, cart_items=None):
-    # Initialize totals
-    total = Decimal(0)
-    quantity = 0
-    tax = Decimal(0)
-    grand_total = Decimal(0)
-    discount = Decimal(0)
-    promo_code = None
-    current_user = request.user
-
-    # Initialize cart_items as an empty list
-    cart_items = []
-
-    if current_user.is_authenticated:
-        # Retrieve the user's cart
-        try:
-            cart = Cart.objects.get(user=current_user)
-            cart_items = CartItem.objects.filter(cart=cart, is_active=True).order_by('-created_at')
-        except Cart.DoesNotExist:
-            cart_items = []  # No cart found for the user
-    else:
-        # For unauthenticated users, retrieve the cart using the session cart ID
-        cart_id = _cart_id(request)
-        cart = Cart.objects.filter(cart_id=cart_id).first()
-
-        if cart:
-            cart_items = CartItem.objects.filter(cart=cart, is_active=True).order_by('-created_at')
-
-        # Check for items stored in the session
-        if 'cart_items' in request.session:
-            session_cart_items = request.session['cart_items']
-            for item in session_cart_items:
-                product = get_object_or_404(Product, id=item['product_id'])
-                temp_cart_item = {
-                    'product': product,
-                    'quantity': item['quantity'],
-                    'color': item['color'],
-                    'size': item['size'],
-                    'sub_total': product.discount_amount * item['quantity'],
-                }
-                cart_items.append(temp_cart_item)
-
-    # Calculate total, quantity, tax, and grand total
-    for cart_item in cart_items:
-        if isinstance(cart_item, dict):
-            item_total = cart_item['sub_total']
-            quantity += cart_item['quantity']
-        else:
-            item_total = cart_item.product.discount_amount * cart_item.quantity
-            quantity += cart_item.quantity
-
-        total += item_total
-
-    # Example tax calculation (2% of total)
-    tax = (Decimal(2) * total) / Decimal(100)
-    grand_total = total + tax
-
-    # Handle promo code application
-    if request.method == 'POST':
-        promo_code = request.POST.get('promo_code')
-        if promo_code:
-            try:
-                promotions = Promotion.objects.get(code=promo_code)
-                discount = (promotions.discount_percentage / Decimal(100)) * total
-                grand_total -= discount
-                messages.success(request, "Promo code applied successfully.")
-                request.session['discount'] = float(discount)
-            except Promotion.DoesNotExist:
-                messages.error(request, "Invalid promo code. Please try again.")
-                # Clear promo code and discount from session if promo code is invalid
-                request.session.pop('promo_code', None)
-                request.session.pop('discount', None)
-
-    else:
-        # On refresh, check if discount exists in session
-        discount = request.session.get('discount', 0)
-        grand_total = total + tax - Decimal(discount)
-
-    # Clear session discount if the cart is empty
-    if not cart_items:
-        request.session.pop('discount', None)  # Clear the discount from the session
-
-    # Prepare context for rendering
-    context = {
-        'cart_items': cart_items,
-        'total': total,
-        'grand_total': grand_total,
-        'tax': tax,
-        'cart_empty': not cart_items,
-        'discount': round(float(discount), 4),
-    }
-    return render(request, 'cart.html', context)
-
-
 # def CartPage(request, total=0, quantity=0, cart_items=None):
+#     print("CartPage is Called")
 #     # Initialize totals
-#     total = 0
+#     total = Decimal(0)
 #     quantity = 0
-#     tax = 0  # Initialize tax if needed
-#     grand_total = 0  # Initialize grand total if needed
-#     discount = 0
-#     finall_total = 0
+#     tax = Decimal(0)
+#     grand_total = Decimal(0)
+#     discount = Decimal(0)
+#     promo_code = None
 #     current_user = request.user
 
 #     # Initialize cart_items as an empty list
@@ -317,48 +226,58 @@ def CartPage(request, total=0, quantity=0, cart_items=None):
 #         if 'cart_items' in request.session:
 #             session_cart_items = request.session['cart_items']
 #             for item in session_cart_items:
-#                 # Retrieve the product object to construct CartItem
 #                 product = get_object_or_404(Product, id=item['product_id'])
-#                 # Create a temporary dictionary to hold cart item information
 #                 temp_cart_item = {
 #                     'product': product,
 #                     'quantity': item['quantity'],
 #                     'color': item['color'],
 #                     'size': item['size'],
-#                     'sub_total': product.discount_amount * item['quantity'],  # Calculate subtotal
+#                     'sub_total': product.discount_amount * item['quantity'],
 #                 }
-#                 cart_items.append(temp_cart_item)  # Append the temporary dictionary
+#                 cart_items.append(temp_cart_item)
 
 #     # Calculate total, quantity, tax, and grand total
 #     for cart_item in cart_items:
-#         # Ensure cart_item is a dictionary when coming from session
 #         if isinstance(cart_item, dict):
-#             item_total = cart_item['sub_total']  # Use pre-calculated subtotal
+#             item_total = cart_item['sub_total']
 #             quantity += cart_item['quantity']
 #         else:
-#             item_total = cart_item.product.discount_amount * cart_item.quantity  # Calculate total for the item
+#             item_total = cart_item.product.discount_amount * cart_item.quantity
 #             quantity += cart_item.quantity
 
 #         total += item_total
 
 #     # Example tax calculation (2% of total)
-#     tax = (2 * total) / 100
-#     grand_total = tax + total
-    
+#     tax = (Decimal(2) * total) / Decimal(100)
+#     grand_total = total + tax
+
 #     # Handle promo code application
 #     if request.method == 'POST':
-#         promo_code = request.POST.get('promo_code')  # Get the promo code from form input
-#         if promo_code:  # Only process if a promo code was provided
+#         promo_code = request.POST.get('promo_code')
+#         if promo_code:
 #             try:
-#                 promotions = Promotion.objects.get(code=promo_code)
-#                 discount = (promotions.discount_percentage / 100) * grand_total
-#                 grand_total -= discount
+#                 promotion = Promotion.objects.get(code=promo_code)
+#                 discount = (promotion.discount_percentage / Decimal(100)) * total
+                
+#                 if discount > total:
+#                     discount = total
+                
+#                 grand_total = total + tax - discount
 #                 messages.success(request, "Promo code applied successfully.")
-#                 # return grand_total
-#                 # return redirect('carts')       
-           
+
+#                 # Save the applied promotion
+#                 AppliedPromotion.objects.update_or_create(
+#                     user=current_user,
+#                     promo_code=promo_code,
+#                     defaults={'discount': discount}
+#                 )
+
 #             except Promotion.DoesNotExist:
 #                 messages.error(request, "Invalid promo code. Please try again.")
+
+#     # Clear session discount if the cart is empty
+#     if not cart_items:
+#         request.session.pop('discount', None)  # Clear the discount from the session
 
 #     # Prepare context for rendering
 #     context = {
@@ -366,56 +285,189 @@ def CartPage(request, total=0, quantity=0, cart_items=None):
 #         'total': total,
 #         'grand_total': grand_total,
 #         'tax': tax,
-#         'cart_empty': not cart_items , # Flag for empty cart
-#         'discount': discount,  # Include discount amount for display if needed
+#         'cart_empty': not cart_items,
+#         'discount': round(float(discount), 4),
 #     }
+#     return render(request, 'cart.html', context)
 
-#    return render(request, 'cart.html', context)
+def calculate_totals(cart_items):
+    total = Decimal(0)
+    quantity = 0
 
+    for cart_item in cart_items:
+        if isinstance(cart_item, dict):
+            item_total = cart_item['sub_total']
+            quantity += cart_item['quantity']
+        else:
+            item_total = cart_item.product.discount_amount * cart_item.quantity
+            quantity += cart_item.quantity
+        
+        total += item_total
+
+    return total, quantity
+
+def handle_promo_code(request, current_user, total):
+    discount = Decimal(0)
+    promo_code = request.POST.get('promo_code')
+
+    if promo_code:
+        try:
+            promotion = Promotion.objects.get(code=promo_code)
+            discount = (promotion.discount_percentage / Decimal(100)) * total
+            discount = min(discount, total)  # Prevent discount > total
+
+            messages.success(request, "Promo code applied successfully.")
+
+            if current_user.is_authenticated:
+                AppliedPromotion.objects.update_or_create(
+                    user=current_user,
+                    promo_code=promo_code,
+                    defaults={'discount': discount}
+                )
+                # Store in session for authenticated users as well
+                request.session['discount'] = float(discount)
+                request.session['promo_code'] = promo_code
+            else:
+                request.session['discount'] = float(discount)
+                request.session['promo_code'] = promo_code
+
+        except Promotion.DoesNotExist:
+            messages.error(request, "Invalid promo code. Please try again.")
+
+    return discount
+
+def CartPage(request, total=0, quantity=0, cart_items=None):
+    print("CartPage is Called")
+    current_user = request.user
+    tax = Decimal(0)
+    grand_total = Decimal(0)
+    discount = Decimal(0)
+
+    # Retrieve the user's cart
+    if current_user.is_authenticated:
+        cart = Cart.objects.filter(user=current_user).first()
+        cart_items = CartItem.objects.filter(cart=cart, is_active=True).order_by('-created_at') if cart else []
+    else:
+        cart_id = _cart_id(request)
+        cart = Cart.objects.filter(cart_id=cart_id).first()
+        cart_items = CartItem.objects.filter(cart=cart, is_active=True).order_by('-created_at') if cart else []
+
+        # Check for items in session
+        if 'cart_items' in request.session:
+            session_cart_items = request.session['cart_items']
+            for item in session_cart_items:
+                product = get_object_or_404(Product, id=item['product_id'])
+                cart_items.append({
+                    'product': product,
+                    'quantity': item['quantity'],
+                    'color': item['color'],
+                    'size': item['size'],
+                    'sub_total': product.discount_amount * item['quantity'],
+                })
+
+    total, quantity = calculate_totals(cart_items)
+
+    # Example tax calculation (2% of total)
+    tax = (Decimal(2) * total) / Decimal(100)
+    grand_total = total + tax
+
+    # Handle promo code application
+    if request.method == 'POST':
+        discount = handle_promo_code(request, current_user, total)
+        grand_total = total + tax - discount
+    else:
+        # Check if there's a discount in the session for unauthenticated users
+        if not current_user.is_authenticated and 'discount' in request.session:
+            discount = Decimal(request.session['discount'])
+            grand_total = total + tax - discount
+        # For authenticated users, check for applied promotions
+        elif current_user.is_authenticated:
+            applied_promos = AppliedPromotion.objects.filter(user=current_user)
+            if applied_promos.exists():
+                last_promo = applied_promos.last()
+                discount = last_promo.discount
+                grand_total = total + tax - discount
+
+    # Clear session discount if the cart is empty
+    if not cart_items:
+        request.session.pop('discount', None)
+        request.session.pop('promo_code', None)
+
+    # Prepare context for rendering
+    context = {
+        'cart_items': cart_items,
+        'total': total,
+        'grand_total': grand_total,
+        'tax': tax,
+        'cart_empty': not cart_items,
+        'discount': round(float(discount), 4),
+    }
+    return render(request, 'cart.html', context)
 
 
 
 @login_required(login_url='login')
 def Checkout(request):
     # Initialize totals
-    total = 0.0  # Ensure total is float
+    total = Decimal(0)
     quantity = 0
-    tax = 0.0  # Ensure tax is float
-    grand_total = 0.0  # Ensure grand total is float
-    discount = 0.0  # Initialize discount as float
+    tax_rate = Decimal(0.02)  # 2% tax
+    grand_total = Decimal(0)
+    discount = Decimal(0)
 
     current_user = request.user
-    cart_items = []
+    cart_items = CartItem.objects.filter(user=current_user, is_active=True)
 
-    # Fetch cart items for the authenticated user
-    try:
-        if current_user.is_authenticated:
-            cart_items = CartItem.objects.filter(user=current_user, is_active=True)
-        else:
-            cart = Cart.objects.get(cart_id=_cart_id(request))
-            cart_items = CartItem.objects.filter(cart=cart, is_active=True)
+    # Calculate total, quantity, and subtotal for each item
+    for cart_item in cart_items:
+        sub_total = cart_item.product.discount_amount * cart_item.quantity
+        total += sub_total
+        quantity += cart_item.quantity
 
-        # Calculate total, quantity, and subtotal for each item
+    # Retrieve discount from session
+    discount = Decimal(request.session.get('discount', 0))  # Default to 0 if not set
+
+    # Calculate Total After Discount
+    total_after_discount = total - discount
+
+    # Calculate tax
+    tax = total_after_discount * tax_rate
+
+    # Grand Total Calculation
+    grand_total = total_after_discount + tax
+
+    # Ensure grand total does not go negative
+    if grand_total < 0:
+        grand_total = Decimal(0)
+
+    # Create an Order instance and save it
+    if request.method == 'POST':
+        order = Order.objects.create(
+            user=current_user,
+            total_price=grand_total,
+            original_price=total,
+            tax=tax,
+            discount=discount
+        )
+
+        # Add items to the order
         for cart_item in cart_items:
-            sub_total = float(cart_item.product.discount_amount) * cart_item.quantity  # Ensure sub_total is float
-            total += sub_total
-            quantity += cart_item.quantity
+            OrderProduct.objects.create(
+                order=order,
+                product=cart_item.product,
+                quantity=cart_item.quantity,
+                price=cart_item.product.discount_amount
+            )
 
-        # Retrieve discount from session and convert to float
-        discount = float(request.session.get('discount', 0))  # Default to 0 if not set
+        # Clear the cart or mark items as purchased
+        cart_items.delete()  # Adjust as necessary for your application logic
 
-        # Calculate tax (assuming a 2% tax rate)
-        tax = (2 * total) / 100  # 2% tax
-        grand_total = total + tax - discount
+        # Clear the session discount after order creation
+        request.session.pop('discount', None)
+        request.session.pop('promo_code', None)
 
-        # Ensure grand total does not go negative
-        if grand_total < 0:
-            grand_total = 0.0  # Set to 0 if negative
-             # Create an Order instance and save it
-        
-       
-    except CartItem.DoesNotExist:
-        cart_items = []
+        # Redirect to the order success page
+        return redirect('order_success')
 
     # Prepare the context
     context = {
@@ -423,68 +475,9 @@ def Checkout(request):
         'total': total,
         'quantity': quantity,
         'tax': tax,
-        'grand_total': grand_total,  # Updated grand total after discount
+        'grand_total': grand_total,
+        'discount': round(float(discount), 4),  # Optional: Include discount in context
     }
 
     return render(request, 'accounts/checkout.html', context)
 
-
-# @login_required(login_url='login')    
-# def Checkout(request):
-#     # Initialize totals
-#     total = 0
-#     quantity = 0
-#     tax = 0
-#     grand_total = 0
-#     discount = 0
-#     promotions=0
-   
-
-#     if request.method == 'POST':
-#         promo_code = request.POST.get('promo_code') #Get the promo code from form input
-#         try:
-#            promotions = Promotion.objects.get(code = promo_code)
-#            discount = (promotions.discount_percentage / 100)*grand_total
-#            grand_total = grand_total - discount
-#            messages.success(request, "Promo code applied successfully.")
-           
-           
-#         except Promotion.DoesNotExist:
-#             messages.error(request, "Invalid promocode. Please try again.")
-            
-           
-#             print(Promotion.DoesNotExist)
-           
-#     current_user = request.user
-#     cart_items = []
-
-#     try:
-#         if current_user.is_authenticated:
-#             cart_items = CartItem.objects.filter(user=current_user, is_active=True)
-#         else:
-#             cart = Cart.objects.get(cart_id=_cart_id(request))
-#             cart_items = CartItem.objects.filter(cart=cart, is_active=True)
-
-#         for cart_item in cart_items:
-#             # Calculate subtotal for the current cart item
-#             sub_total = cart_item.product.discount_amount * cart_item.quantity
-#             total += sub_total
-#             quantity += cart_item.quantity
-
-#         # Calculate tax and grand total
-#         tax = (2 * total) / 100  # Assuming a 2% tax rate
-#         grand_total = total + tax
-
-#     except ObjectDoesNotExist:
-#         cart_items = []
-#     context =  {
-#         'cart_items': cart_items,
-#         'total': total,
-#         'quantity': quantity,
-#         'tax': tax,
-#         'grand_total': grand_total,
-        
-#     }
-    
-    
-#     return render(request, 'accounts/checkout.html',context)

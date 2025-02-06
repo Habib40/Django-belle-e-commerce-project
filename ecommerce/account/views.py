@@ -21,6 +21,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 import requests
 import logging
+from decimal import Decimal, InvalidOperation
 
 logger = logging.getLogger(__name__)
 
@@ -160,7 +161,7 @@ def Activate(request,uidb64,token):
         
         
 
-from decimal import Decimal
+
 
 
 
@@ -323,21 +324,38 @@ def Activate(request, uidb64, token):
 
 @login_required(login_url='login')
 def Dashboard(request):
+    print("Problem in dashboard")
     try:
         orders = Order.objects.filter(user=request.user).order_by('-created_at')
         order_details = []
 
         for order in orders:
             order_products = OrderProduct.objects.filter(order=order).select_related('product')
-            subtotal = Decimal('0.00')
+            subtotal = 0  # Use float instead of Decimal
 
             for order_product in order_products:
-                discount_amount = Decimal(order_product.discount_amount)
-                quantity = order_product.quantity
+                # Ensure discount_amount is a valid float
+                try:
+                    discount_amount = float(order_product.discount_amount)
+                except (ValueError, TypeError) as e:
+                    print(f"Invalid discount amount: {order_product.discount_amount}, Error: {e}")
+                    discount_amount = 0 # Default to 0
+
+                # Ensure quantity is a valid float
+                try:
+                    quantity_value = str(order_product.quantity) # Convert to string and strip whitespace
+                    quantity = float(quantity_value)
+                except (ValueError, TypeError) as e:
+                    print(f"Invalid quantity: {order_product.quantity}, Error: {e}")
+                    quantity = 0  # Default to 0
+
+                print(f"Calculating subtotal... Discount Amount: {discount_amount}, Quantity: {quantity}")
+
                 subtotal += discount_amount * quantity
 
-            shipping_fee = Decimal(order.shipping_fee) if order.shipping_fee else Decimal('0.00')
-            tax = subtotal * Decimal('0.02')
+            # Calculate shipping fee
+            shipping_fee = float(order.shipping_fee) if order.shipping_fee else 0.00
+            tax = subtotal * 0.02
             total = subtotal + shipping_fee + tax
 
             order_details.append({
@@ -357,7 +375,8 @@ def Dashboard(request):
     except Exception as e:
         print(f"Error retrieving orders or order products: {e}")
         return render(request, 'accounts/dashboard.html', {'error': 'Could not retrieve orders or order products.'})
-
+    
+    
 def FogotPassword(request):
     if request.method == 'POST':
         email = request.POST['email']

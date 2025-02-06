@@ -11,14 +11,14 @@
             <aside class="col-md-3">
                 <!--   SIDEBAR   -->
                 <ul class="list-group">
-                    <a class="list-group-item active" href="#"> My order history </a>
-                    <a class="list-group-item" href="#"> Transactions </a>
-                    <a class="list-group-item" href="#"> Return and refunds </a>
-                    <a class="list-group-item" href="#"> Settings </a>
-                    <a class="list-group-item" href="#"> My Selling Items </a>
+                    <a class="list-group-item active bg-primary text-white" href="#"> My order history </a>
+                    <a class="list-group-item bg-info text-dark" href="#"> Transactions </a>
+                    <a class="list-group-item bg-warning text-dark" href="#"> Return and refunds </a>
+                    <a class="list-group-item bg-success text-white" href="#"> Settings </a>
+                    <a class="list-group-item bg-secondary text-white" href="#"> My Selling Items </a>
                 </ul>
                 <br>
-                <a class="btn btn-light btn-block" href="#"> <i class="fa fa-power-off"></i> <span class="text">Log out</span> </a> 
+                <a class="btn btn-danger btn-block" href="#"> <i class="fa fa-power-off"></i> <span class="text">Log out</span> </a> 
                 <!--   SIDEBAR .//END   -->
             </aside>
 
@@ -26,7 +26,7 @@
                 {% if order_details %}
                     {% for detail in order_details %}
                     <article class="card mb-4">
-                        <header class="card-header">
+                        <header class="card-header bg-dark text-white">
                             <strong class="d-inline-block mr-3"> Order Number: {{ detail.order.order_number }}</strong>
                             <span>Order Date: {{ detail.order.created_at|date:"d F Y H:i" }}</span>
                         </header>
@@ -37,7 +37,7 @@
                                     {% if messages %}
                                     <div id="message" class="btn btn-success btn-block">
                                         {% for message in messages %}
-                                            <div class="alert">{{ message }}</div>
+                                            <div class="alert alert-info">{{ message }}</div>
                                         {% endfor %}
                                     </div>
                                     {% endif %}
@@ -76,11 +76,12 @@
                                         {{ detail.order.payment_type|title }} **** {{ detail.order.card_last_digits }}
                                     </span>
                                     <p>
-                                        Subtotal: ${{ detail.order.order_total|floatformat:2 }} <br>
-                                        Shipping Fee: ${{ detail.order.shipping_fee|floatformat:2 }} <br> 
-                                        <span class="font-weight-bold">Total: ${{ detail.order.order_total|floatformat:2 }}</span>
+                                        Subtotal: <span class="text-primary">${{ detail.order.order_total|floatformat:2 }}</span> <br>
+                                        Shipping Fee: <span class="text-secondary">${{ detail.order.shipping_fee|floatformat:2 }}</span> <br> 
+                                        <span class="font-weight-bold text-danger">Total: ${{ detail.order.order_total|floatformat:2 }}</span>
                                         <h5>
-                                            <span class="font-weight-bold">Status: {{ detail.order.status }}</span>
+                                            <span class="font-weight-bold text-warning">Status: {{ detail.order.status }}</span>
+                                            <a href="{% url 'generate_invoice' detail.order.id %}" class="btn btn-success bg-light text-info">Invoice</a>
                                         </h5>
                                     </p>
                                 </div>
@@ -88,12 +89,11 @@
 
                             <div class="table-responsive">
                                 <table class="table table-hover">
-                                    <thead>
+                                    <thead class="thead-dark">
                                         <tr>
                                             <th>Product</th>
                                             <th>Title</th>
                                             <th>Seller</th>
-                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -110,11 +110,7 @@
                                                     <var class="price text-muted">USD {{ order_product.product.discount_amount }}</var>
                                                 </a>
                                             </td>
-                                            <td>Seller <br> </td>
-                                            <td width="250">
-                                                <a href="#" class="btn btn-outline-primary">Track order</a>
-                                                <a href="{% url 'generate_invoice' detail.order.id %}" class="btn btn-light">Invoice</a>
-                                            </td>
+                                            <td class="text-info">Admin <br> </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
