@@ -5,8 +5,8 @@ services:
     env: python
     runtime:python3
     plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn ecommerce.wsgi:application --workers 4 --bind 0.0.0.0:8000
+    buildCommand: "./build.sh"
+    startCommand: "python -m gunicorn ecommerce.asgi:application -k uvicorn.workers.UvicornWorker"
     envVars:
       - key: DB_NAME
         value: Ecommerce   # Update with your database name
