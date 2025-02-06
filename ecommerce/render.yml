@@ -21,4 +21,4 @@ services:
       - key: SECRET_KEY
         value: django-insecure-rqszx%yl*+!m!5(o@(g!2keuyhu5)oncur@qqlla*dg6c&g3sk       # Update with your Django secret key
       - key: DEBUG
-        value: 'false'                # Change to 'true' for debugging if needed
+        value: 'false'          # Change to 'true' for debugging if needed
