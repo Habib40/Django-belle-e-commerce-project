@@ -1,25 +1,38 @@
-version: 1
+# Exported from Render on 2025-02-06T12:41:35Z
 services:
-  - type: web
-    name: bele    # Change this to a name for your service
-    env: python
-    plan: free
-    buildCommand: |
-      pip install -r requirements.txt
-      python manage.py collectstatic --noinput
-    startCommand: gunicorn ecommerce.wsgi:application --bind 0.0.0.0:8000
-    envVars:
-      - key: DB_NAME
-        value: Ecommerce   # Update with your database name
-      - key: DB_USER
-        value: admin    # Update with your database user
-      - key: DB_PASSWORD
-        value: admin # Update with your database password
-      - key: DB_HOST
-        value: localhost     # Update with your database host
-      - key: DB_PORT
-        value: 5432     # Update with your database port
-      - key: SECRET_KEY
-        value: django-insecure-rqszx%yl*+!m!5(o@(g!2keuyhu5)oncur@qqlla*dg6c&g3sk       # Update with your Django secret key
-      - key: DEBUG
-        value: 'false'                # Change to 'true' for debugging if needed
+- type: web
+  name: Django-belle-e-commerce-project-1
+  runtime: node
+  repo: https://github.com/Habib40/Django-belle-e-commerce-project
+  plan: free
+  envVars:
+  - key: DEBUG
+    sync: false
+  - key: SECRET_KEY
+    sync: false
+  - key: DATABASE_PORT
+    sync: false
+  - key: DATABASE_HOST
+    sync: false
+  - key: DATABASE_PASSWORD
+    sync: false
+  - key: DATABASE_USER
+    sync: false
+  - key: DATABASE_NAME
+    sync: false
+  - key: IT_PAY_BD_API_KEY
+    sync: false
+  - key: STRIPE_SECRET_KEY
+    sync: false
+  - key: STRIPE_PUBLISHABLE_KEY
+    sync: false
+  - key: STEADFAST_BASE_URL
+    sync: false
+  - key: STEADFAST_SECRET_KEY
+    sync: false
+  - key: STEADFAST_API_KEY
+    sync: false
+  region: oregon
+  buildCommand: ecommerce.wsgi.application
+  startCommand: ecommerce.wsgi.application
+version: "1"
