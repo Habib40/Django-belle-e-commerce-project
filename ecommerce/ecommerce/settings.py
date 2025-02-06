@@ -43,6 +43,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    
     'whitenoise.runserver_nostatic',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -94,10 +95,10 @@ TEMPLATES = [
 ]
 
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ecommerce.settings')
+# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ecommerce.settings')
 
-# Get the WSGI application for the project.
-application = get_wsgi_application()
+# # Get the WSGI application for the project.
+# application = get_wsgi_application()
 
 WSGI_APPLICATION = 'ecommerce.wsgi.application'
 

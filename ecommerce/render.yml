@@ -3,11 +3,10 @@ services:
   - type: web
     name: bele    # Change this to a name for your service
     env: python
+    runtime:python3
     plan: free
-    buildCommand: |
-      pip install -r requirements.txt
-      python manage.py collectstatic --noinput
-    startCommand: gunicorn ecommerce.wsgi:application --bind 0.0.0.0:8000
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn ecommerce.wsgi:application --workers 4 --bind 0.0.0.0:8000
     envVars:
       - key: DB_NAME
         value: Ecommerce   # Update with your database name
