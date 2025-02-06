@@ -3,6 +3,8 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
+from django.core.wsgi import get_wsgi_application
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -90,6 +92,12 @@ TEMPLATES = [
         },
     },
 ]
+
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ecommerce.settings')
+
+# Get the WSGI application for the project.
+application = get_wsgi_application()
 
 WSGI_APPLICATION = 'ecommerce.wsgi.application'
 
