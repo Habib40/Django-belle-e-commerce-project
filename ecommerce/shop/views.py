@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect,get_object_or_404 ,HttpResponse
 import requests
-
+from datetime import datetime,timedelta
+from django.utils import timezone
 from django.db.models import Avg  # Import Avg here
 from .models import Product,Review,ProductColor,WishList
 from .forms import ReviewForm
@@ -21,6 +22,9 @@ def custom_404_view(request, exception):
 
 def Index(request):
     products = Product.objects.all().order_by('-created_at')
+     # Check the quantity_left for each product
+    for product in products:
+        print(f"Product: {product.title}, Quantity Left: {product.quantity_left}")
     new_products = Product.objects.order_by('-created_at')[:52]
     
     return render(request,'shop/home2.html',{'products':products,'new_products':new_products})
@@ -52,11 +56,34 @@ def OureStore(request, category_slug=None):
 
 
 def ProductDetail(request, category_slug, product_slug):
+    current_time = timezone.now()
     # Initialize variables for savings and discount percentage
     savings = 0
     discount_percentage = 0
     # Get the product or return a 404 error if it doesn't exist
     products = get_object_or_404(Product, category__slug=category_slug, slug=product_slug)
+    # Calculate how long ago items were sold
+      # Calculate how long ago items were sold
+    sold_time = products.last_sold_time  # Replace with the actual field for sold time
+
+    # Ensure sold_time is timezone-aware
+    if sold_time and sold_time.tzinfo is None:
+        sold_time = timezone.make_aware(sold_time)
+
+    time_difference = current_time - sold_time if sold_time else None
+    if time_difference:
+        if time_difference < timedelta(hours=1):
+            time_message = f"in the last {int(time_difference.total_seconds() // 60)} minutes"
+        elif time_difference < timedelta(days=1):
+            time_message = f"in the last {int(time_difference.total_seconds() // 3600)} hours"
+        elif time_difference < timedelta(days=2):
+            time_message = "yesterday"
+        else:
+            time_message = "more than one day ago"
+    else:
+        time_message = "not sold yet"
+    
+    
     # Handle recently viewed products
     recently_viewed_products = []
     if 'recently_viewed' in request.session:
@@ -107,28 +134,18 @@ def ProductDetail(request, category_slug, product_slug):
         savings = products.price - (products.discount_amount or 0)
         discount_percentage = (savings / products.price * 100) if products.price else 0
 
-    # Increment views or last sale hours
-    products.increment_last_sale_in_hours()
-
-    # Sales message logic
-    if products.last_sale_in_hours >= 24:
-        days = products.last_sale_in_hours // 24
-        hours = products.last_sale_in_hours % 24
-        
-        if hours > 0:
-            sales_message = f"{products.items_sold} sold in the last {days} days and {hours} hours"
-        else:
-            sales_message = f"{products.items_sold} sold in the last {days} days"
-    else:
-        sales_message = f"{products.items_sold} sold in the last {products.last_sale_in_hours} hours"
-
+    
+    
+  
     # Prepare context for rendering
     context = {
+        'current_time':current_time,
+        'time_message':time_message,
         'color': [pc.color_name for pc in product_color],
         'size': [pc.size for pc in product_color],
         'user_id': request.user.id if request.user.is_authenticated else None,
-        'sales_message': sales_message,
         'items_sold': products.items_sold,
+        'quantity_left': products.quantity_left,
         'products': products,
         'savings': savings,
         'images': images,
@@ -140,6 +157,7 @@ def ProductDetail(request, category_slug, product_slug):
         'recently_viewed_products': (recently_viewed_products),
         
     }
+    print(context)
 
     return render(request, 'shop/productDetail.html', context)
 

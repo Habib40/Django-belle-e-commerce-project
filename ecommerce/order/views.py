@@ -37,6 +37,79 @@ logger = logging.getLogger(__name__)
 
 @login_required(login_url='login')
 
+# def PlaceOrder(request, total=0, tax=0, quantity=0):
+#     current_user = request.user
+#     cart_items = CartItem.objects.filter(user=current_user)
+
+#     grand_total = 0
+#     for cart_item in cart_items:
+#         total += (cart_item.product.discount_amount or 0) * cart_item.quantity  # Handle None safely
+#         quantity += cart_item.quantity
+
+#     tax = (2 * total) / 100
+#     grand_total = total + tax
+
+#     if request.method == 'POST':
+#         form = OrderForm(request.POST)
+#         if form.is_valid():
+#             # Create an order instance
+#             order = Order(
+#                 user=current_user,
+#                 first_name=form.cleaned_data['first_name'],
+#                 last_name=form.cleaned_data['last_name'],
+#                 email=form.cleaned_data['email'],
+#                 phone=form.cleaned_data['phone'],
+#                 address_line_1=form.cleaned_data['address_line_1'],
+#                 address_line_2=form.cleaned_data['address_line_2'],
+#                 country=form.cleaned_data['country'],
+#                 state=form.cleaned_data['state'],
+#                 city=form.cleaned_data['city'],
+#                 order_note=form.cleaned_data['order_note'],
+#                 tax=tax,
+#                 ip=request.META.get('REMOTE_ADDR'),
+#                 order_total=grand_total
+#             )
+#             order.save()  # Save the order first to get the ID
+#             order.order_number = f"{datetime.date.today():%Y%d%m}-{order.id}"  # Use a more unique format
+#             order.save()  # Save again to update the order number
+
+#             # Create OrderProduct instances
+#             for cart_item in cart_items:
+#                 color = cart_item.color
+#                 size = cart_item.size
+#                 discount_amount = cart_item.product.discount_amount or 0  # Default to 0 if None
+
+#                 # Create OrderProduct instance
+#                 OrderProduct.objects.create(
+#                     order=order,
+#                     user=current_user,
+#                     product=cart_item.product,
+#                     color=color,
+#                     # tax=tax,
+#                     # grand_total=grand_total,
+#                     size=size,
+#                     quantity=cart_item.quantity,
+#                     product_price=cart_item.product.price,
+#                     discount_amount=discount_amount,
+#                     ordered=True
+#                 )
+
+#             # Delete cart items after placing the order
+#             cart_items.delete()
+
+#             # Send a success message to the user
+#             messages.success(request, 'Your order has been placed successfully!')
+
+#             # Redirect to the payments page with order details
+#             return redirect('payments', order_id=order.id)
+
+#         else:
+#             messages.error(request, 'Please correct the errors in the form.')
+#             return render(request, 'accounts/checkout.html', {'form': form})
+
+#     form = OrderForm()  # Initialize an empty form for GET requests
+#     return render(request, 'accounts/checkout.html', {'form': form})
+
 def PlaceOrder(request, total=0, tax=0, quantity=0):
     current_user = request.user
     cart_items = CartItem.objects.filter(user=current_user)
@@ -73,35 +146,38 @@ def PlaceOrder(request, total=0, tax=0, quantity=0):
             order.order_number = f"{datetime.date.today():%Y%d%m}-{order.id}"  # Use a more unique format
             order.save()  # Save again to update the order number
 
+            # Track if we can successfully create all order products
+            can_create_order = True
+
             # Create OrderProduct instances
             for cart_item in cart_items:
-                color = cart_item.color
-                size = cart_item.size
-                discount_amount = cart_item.product.discount_amount or 0  # Default to 0 if None
+                if cart_item.quantity > cart_item.product.quantity_left:
+                    messages.error(request, f"Not enough stock for {cart_item.product.title}.")
+                    can_create_order = False
+                    break
 
                 # Create OrderProduct instance
                 OrderProduct.objects.create(
                     order=order,
                     user=current_user,
                     product=cart_item.product,
-                    color=color,
-                    # tax=tax,
-                    # grand_total=grand_total,
-                    size=size,
+                    color=cart_item.color,
+                    size=cart_item.size,
                     quantity=cart_item.quantity,
                     product_price=cart_item.product.price,
-                    discount_amount=discount_amount,
+                    discount_amount=cart_item.product.discount_amount or 0,
                     ordered=True
                 )
 
-            # Delete cart items after placing the order
-            cart_items.delete()
+            if can_create_order:
+                # Delete cart items after placing the order
+                cart_items.delete()
 
-            # Send a success message to the user
-            messages.success(request, 'Your order has been placed successfully!')
+                # Send a success message to the user
+                messages.success(request, 'Your order has been placed successfully!')
 
-            # Redirect to the payments page with order details
-            return redirect('payments', order_id=order.id)
+                # Redirect to the payments page with order details
+                return redirect('payments', order_id=order.id)
 
         else:
             messages.error(request, 'Please correct the errors in the form.')

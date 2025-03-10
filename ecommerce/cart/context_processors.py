@@ -51,3 +51,5 @@ def cart_context(request, cart_item_id=None):
         'tax': tax,
         'items_count': items_count,
     }
+    
+

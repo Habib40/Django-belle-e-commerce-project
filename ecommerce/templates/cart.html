@@ -73,13 +73,13 @@
                                     <div class="cart__qty text-center">
                                         <div class="qtyField">
                                             <!-- Form for Decreasing Quantity -->
-                                            <form method="POST" action="{% url 'addToCart' item.product.id %}" style="display:inline;">
+                                            <form method="POST" action="{% url 'minus_cart' item.product.id %}" style="display:inline;">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="color" value="{{ item.color }}">
                                                 <input type="hidden" name="size" value="{{ item.size }}">
-                                                <button type="submit" class="qtyBtn plus" title="Increase Quantity">
+                                                <a href="{% url 'minus_cart' item.product.id %}" class="qtyBtn plus" title="Increase Quantity">
                                                     <i class="icon icon-minus"></i>
-                                                </button>
+                                                </a>
                                             </form>
                                             <!-- Quantity Input -->
                                             <input class="cart__qty-input qty" type="text" name="quantity" id="qty_{{ item.id }}" value="{{ item.quantity }}" readonly>

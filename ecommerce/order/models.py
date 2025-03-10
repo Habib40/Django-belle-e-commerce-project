@@ -3,7 +3,7 @@ from decimal import Decimal
 # Create your models here.
 from django.db import models
 from account.models import Account
-from shop.models import ProductColor,Product
+#from shop.models import Product
 
 
 class Payment(models.Model):
@@ -66,7 +66,7 @@ class OrderProduct(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, null=True)
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey('shop.Product', on_delete=models.CASCADE)
     
     # Direct fields for color and size
     color = models.CharField(max_length=50, null=True, blank=True)

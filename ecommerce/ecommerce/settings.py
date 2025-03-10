@@ -1,5 +1,5 @@
 # Import dj-database-url at the beginning of the file.
-import dj_database_url
+# import dj_database_url
 from pathlib import Path
 import os
 from dotenv import load_dotenv

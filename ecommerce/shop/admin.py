@@ -21,27 +21,37 @@ class ProductColorInLine(admin.TabularInline):
     get_color_preview.allow_tags = True  # Allow HTML in the admin
     get_color_preview.short_description = 'Color Preview'  # Custom label for the field
 
+class ProductImageInline(admin.TabularInline):
+    model = ProductImage  # Replace with your actual model
+    extra = 0
+
+class ProductColorInline(admin.TabularInline):
+    model = ProductColor  # Replace with your actual model
+    extra = 0
+
 class ProductAdmin(admin.ModelAdmin):
-    inlines = [ProductImageInline,ProductColorInLine]  # Include inline for managing product images
-     
-    
+    inlines = [ProductImageInline, ProductColorInline]  # Include inline for managing product images
+
     list_display = ('title', 'show_image', 'price', 'is_available', 'created_at')  # Use show_image to display image
     readonly_fields = ('discount_percentage',)  # Keep discount_percentage read-only
     prepopulated_fields = {'slug': ('title',)}  # Automatically generate slug from title
+    readonly_fields = ('last_sold_time',) 
+
     fieldsets = (
         (None, {
-            'fields': ('title', 'slug', 'images', 'hoverImg', 'sku','category', 'description')
+            'fields': ('title', 'slug', 'images', 'hoverImg', 'sku', 'category', 'description')
         }),
         ('Pricing', {
             'fields': ('price', 'discount_amount', 'compare_price', 'quantity_sold', 'quantity_left', 'stock')
         }),
         ('Sales Data', {
-            'fields': ('items_sold', 'last_sale_in_hours','last_sale_time','labels')
+            'fields': ('items_sold',  'last_sold_time', 'labels')
         }),
         ('Related Products', {
             'fields': ('related_products',)
         }),
     )
+
     def show_image(self, obj):
         if obj.images:
             # Display the product image as a thumbnail
@@ -49,7 +59,7 @@ class ProductAdmin(admin.ModelAdmin):
         return "No Image"  # Fallback if no image is found
 
     show_image.short_description = 'Image'  # Column name in the admin list view
-   
+
     def save_model(self, request, obj, form, change):
         try:
             # Save the object first to ensure it has an ID
@@ -60,10 +70,9 @@ class ProductAdmin(admin.ModelAdmin):
                 obj.related_products.set(form.cleaned_data['related_products'])
 
         except ValidationError as e:
-            for error in e.messages:
-                messages.error(request, 'An error ocured')
-            return  # Prevent saving the invalid object
-    
+            
+            messages.error(request, f"An error occurred: {e}")
+
 # Register the Product model with the custom admin class
 admin.site.register(Product, ProductAdmin)
 

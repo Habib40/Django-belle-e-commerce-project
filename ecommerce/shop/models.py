@@ -8,6 +8,7 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from django.urls import reverse
 from account.models import Account
+from order.models import Order,OrderProduct
 
 
 # Define product labels
@@ -71,37 +72,11 @@ class Product(models.Model):
     labels = models.CharField(max_length=40, choices=LABELS)
     stock = models.IntegerField()
     items_sold = models.IntegerField(default=0)
-    last_sale_in_hours = models.IntegerField(default=0)
+    last_sold_time = models.DateTimeField(auto_now=True,null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_available = models.BooleanField(default=True)
-    last_sale_time = models.DateTimeField(null=True, blank=True)
-    
-    def increment_last_sale_in_hours(self):
-        current_time = timezone.now()
 
-        # Check if last_sale_time is set and if 60 minutes have passed
-        if self.last_sale_time is None or (current_time - self.last_sale_time >= timedelta(minutes=60)):
-            try:
-                self.last_sale_in_hours += 1
-                self.last_sale_time = current_time  # Update last sale time
-                self.save(update_fields=['last_sale_in_hours', 'last_sale_time'])
-            except Exception as e:
-                import traceback
-                print(f"Error while incrementing last_sale_in_hours: {e}")
-                traceback.print_exc()
-        else:
-            print("Less than 60 minutes since last sale. No increment performed.")
-
-    def update_last_sale(self):
-        self.last_sale_time = timezone.now()
-        self.last_sale_in_hours += self.calculate_hours_since_last_sale()
-        self.save()
-
-    def calculate_hours_since_last_sale(self):
-        if self.last_sale_time:
-            return (timezone.now() - self.last_sale_time).total_seconds() // 3600
-        return 0
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -115,6 +90,7 @@ class Product(models.Model):
             self.discount_percentage = 0
 
         super().save(*args, **kwargs)
+    
 
     def get_image_url(self):
         return self.images.url

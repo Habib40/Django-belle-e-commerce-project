@@ -114,16 +114,26 @@
                                     
                                         <div class="orderMsg" data-user="{{ user_id }}" data-time="{{ time }}">
                                             <img src="{% static 'assets/images/order-icon.jpg' %}" alt="" />
-                                            <strong class="items"></strong> <strong class="time">{{ sales_message }}</strong> 
+                                            <strong class="items"></strong> <strong class="time">{{ items_sold }} Items sold {{time_message}}</strong>
                                         </div>
                                     
                                     
                                 <div class="product-single__description rte">
                                     <ul>
                                         <li>{{products.description}}</li> 
+                                        
                                     </ul>
+
                                 </div>
-                                <div id="quantity_message">Hurry! Only  <span class="items">4</span>  left in stock.</div>
+                                {% if quantity_left <= 4 %}
+                                <div id="quantity_message">
+                                    Hurry! Only <span class="items">{{ quantity_left }}</span> left in stock.
+                                </div>
+                            {% else %}
+                                <div id="quantity_message">
+                                    Call us on <a href="https://wa.me/+8801744194831" class="phone-no">WhatsApp</a> for more information.
+                                </div>
+                            {% endif %}
                                 <!-- This form for colos and sizes  -->
                                 <form method="post" action="{% url 'addToCart' products.id %}" id="product_form_{{ product.id }}" accept-charset="UTF-8" class="product-form product-form-product-template hidedropdown" enctype="multipart/form-data">
                                     {% csrf_token %}
@@ -191,15 +201,11 @@
                                                 <a target="_blank" href="#" class="btn btn--small btn--secondary btn--share share-twitter" title="Tweet on Twitter">
                                                     <i class="fa fa-twitter" aria-hidden="true"></i> <span class="share-title" aria-hidden="true">Tweet</span>
                                                 </a>
-                                                <a href="#" title="Share on google+" class="btn btn--small btn--secondary btn--share" >
-                                                    <i class="fa fa-google-plus" aria-hidden="true"></i> <span class="share-title" aria-hidden="true">Google+</span>
-                                                </a>
+                                               
                                                 <a target="_blank" href="#" class="btn btn--small btn--secondary btn--share share-pinterest" title="Pin on Pinterest">
                                                     <i class="fa fa-pinterest" aria-hidden="true"></i> <span class="share-title" aria-hidden="true">Pin it</span>
                                                 </a>
-                                                <a href="#" class="btn btn--small btn--secondary btn--share share-pinterest" title="Share by Email" target="_blank">
-                                                    <i class="fa fa-envelope" aria-hidden="true"></i> <span class="share-title" aria-hidden="true">Email</span>
-                                                </a>
+                                                
                                              </div>
                                         </div>
                                     </div>
