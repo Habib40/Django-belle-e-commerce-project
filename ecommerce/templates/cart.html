@@ -37,10 +37,9 @@
             </div>
         </div>
     <div class="container">
-        <div class="row">
-                        
+        <div class="row">         
             <div class="col-12 col-sm-12 col-md-8 col-lg-8 main-col">
-                <form action="#" method="post" class="cart style2">
+               
                     <table>
                         <thead class="cart__row cart__header">
                             <tr>
@@ -72,24 +71,25 @@
                                 <td class="cart__update-wrapper cart-flex-item text-right">
                                     <div class="cart__qty text-center">
                                         <div class="qtyField">
-                                            <!-- Form for Decreasing Quantity -->
-                                            <form method="POST" action="{% url 'minus_cart' item.product.id %}" style="display:inline;">
+                                           <!-- Form for Decreasing Quantity -->
+                                            <form method="POST" action="{% url 'minus_cart' item.product.id item.color item.size %}" style="display:inline;">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="color" value="{{ item.color }}">
                                                 <input type="hidden" name="size" value="{{ item.size }}">
-                                                <a href="{% url 'minus_cart' item.product.id %}" class="qtyBtn plus" title="Increase Quantity">
+                                                <button type="submit" class="qtyBtn minus" title="Decrease Quantity" onclick="return confirm('Decrease quantity?');">
                                                     <i class="icon icon-minus"></i>
-                                                </a>
+                                                </button>
                                             </form>
+                                                                                        
                                             <!-- Quantity Input -->
                                             <input class="cart__qty-input qty" type="text" name="quantity" id="qty_{{ item.id }}" value="{{ item.quantity }}" readonly>
-                                        
+                                            
                                             <!-- Form for Increasing Quantity -->
                                             <form method="POST" action="{% url 'addToCart' item.product.id %}" style="display:inline;">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="color" value="{{ item.color }}">
                                                 <input type="hidden" name="size" value="{{ item.size }}">
-                                                <button type="submit" class="qtyBtn minus" title="Increase Quantity">
+                                                <button type="submit" class="qtyBtn plus" title="Increase Quantity">
                                                     <i class="icon icon-plus"></i>
                                                 </button>
                                             </form>
@@ -100,16 +100,6 @@
                                     <div><span class="money">${{ item.sub_total }}</span></div>
                                 </td>
                                 
-                                <td class="text-center small--hide">
-                                    <form method="POST" action="{% url 'remove_cart' product_id=item.product.id color=item.color size=item.size  %}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="color" value="{{ item.color }}">
-                                        <input type="hidden" name="size" value="{{ item.size }}">
-                                        <button type="submit" onclick="return confirm('Are you sure you want to remove this item from your cart?');" class="btn btn--secondary cart__remove" title="Remove item">
-                                            <i class="icon icon anm anm-times-l"></i>
-                                        </button>
-                                    </form>
-                                </td>
                                 
                             </tr>
                             {% empty %}
@@ -121,18 +111,17 @@
                         <tfoot>
                             <tr>
                                 <td colspan="3" class="text-left">
-                                <a href="{% url 'store' %}" class="btn--link cart-continue">
+                                    <a href="{% url 'store' %}" class="btn--link cart-continue">
                                         <i class="icon icon-arrow-circle-left"></i> Continue shopping
                                     </a>
                                 </td>
-                               
                             </tr>
                         </tfoot>
                     </table>
-                 <div class="currencymsg">We processes all orders in USD. While the content of your cart is currently displayed in USD, the checkout will use USD at the most current exchange rate.</div>
+                    <div class="currencymsg">
+                        We process all orders in USD. While the content of your cart is currently displayed in USD, the checkout will use USD at the most current exchange rate.
+                    </div>
                 
-                
-             </form>                   
             </div>
 
             <div class="col-12 col-sm-12 col-md-4 col-lg-4 cart__footer" style="background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 20px; border-radius: 5px;">

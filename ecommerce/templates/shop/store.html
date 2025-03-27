@@ -31,7 +31,11 @@
                                 <ul class="list-group">
                                     <li class="list-group-item"><a href="{% url 'store' %}">All products</a></li>
                                     {% for category in links %}
-                                        <li class="list-group-item"><a href="{{ category.get_url }}">{{ category.name }}</a></li>
+                                        {% if category.slug %}  {# Check if the category has a valid slug #}
+                                            <li class="list-group-item"><a href="{{ category.get_url }}">{{ category.name }}</a></li>
+                                        {% else %}
+                                            <li class="list-group-item">{{ category.name }} </li>  {# Fallback text if no slug exists #}
+                                        {% endif %}
                                     {% endfor %}
                                 </ul>
                             </div> <!-- card-body.// -->

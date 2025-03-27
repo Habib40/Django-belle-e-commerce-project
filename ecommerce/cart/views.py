@@ -81,17 +81,143 @@ def Add_to_Cart(request, product_id):
         return redirect('carts')
     else:
         return redirect('carts')
+from django.shortcuts import get_object_or_404, redirect
+from django.http import JsonResponse
+from django.contrib import messages
+from .models import Cart, CartItem
 
-def minus_cart(request, product_id):
+# def minus_cart(request, product_id):
+#     print("minus_cart function called with product_id:", product_id)
+#     if request.method == 'POST':
+#         current_user = request.user
+
+#         if current_user.is_authenticated:
+#             print("Authenticated user detected.")
+#             try:
+#                 cart = Cart.objects.get(user=current_user)
+#                 cart_item = get_object_or_404(CartItem, product__id=product_id, cart=cart)
+#                 print(f"Current item quantity: {cart_item.quantity}")
+
+#                 if cart_item.quantity > 1:
+#                     cart_item.quantity -= 1  # Decrease the quantity
+#                     cart_item.save()  # Save changes
+#                     print(f"Updated item quantity: {cart_item.quantity}")
+#                     messages.success(request, "Item quantity decreased.")
+#                     new_quantity = cart_item.quantity
+#                 else:
+#                     print("Quantity is 0, item will be deleted.")
+#                     cart_item.delete()  # Remove item if quantity is 0
+#                     messages.success(request, "Item removed from cart.")
+#                     new_quantity = 0  # Set quantity to 0 after deletion
+                
+#                 # return JsonResponse({'status': 'success', 'new_quantity': new_quantity})
+#                 return redirect('carts')
+
+#             except Cart.DoesNotExist:
+#                 messages.error(request, "Cart not found.")
+#                 print("Cart does not exist.")
+#                 return JsonResponse({'status': 'error', 'message': "Cart not found."}, status=404)
+#             except Exception as e:
+#                 print(f"Error occurred: {e}")
+#                 messages.error(request, "An error occurred while updating the cart.")
+#                 return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+#         else:
+#             print("Unauthenticated user detected.")
+#             session_cart_items = request.session.get('cart_items', [])
+#             item_found = False
+
+#             for item in session_cart_items:
+#                 if item['product_id'] == product_id:
+#                     print(f"Found item in session cart: {item}")
+#                     if item['quantity'] > 1:
+#                         item['quantity'] -= 1  # Decrease the quantity
+#                         messages.success(request, "Item quantity decreased.")
+#                         new_quantity = item['quantity']
+#                     else:
+#                         print("Quantity is 0, item will be removed from session cart.")
+#                         session_cart_items.remove(item)  # Remove item if quantity is 0
+#                         messages.success(request, "Item removed from cart.")
+#                         new_quantity = 0  # Set quantity to 0 after deletion
+#                     item_found = True
+#                     break
+
+#             if not item_found:
+#                 messages.error(request, "Item not found in session cart.")
+#                 return JsonResponse({'status': 'error', 'message': "Item not found in session cart."}, status=404)
+
+#             # Update session cart items
+#             request.session['cart_items'] = session_cart_items
+#             request.session.modified = True  # Mark session as modified
+#             print(f"Updated session cart items: {session_cart_items}")
+#             # return JsonResponse({'status': 'success', 'new_quantity': new_quantity})
+#             return redirect('carts')
+
+#     print("Minus Cart is called")
+#     return redirect('checkout')
+
+# def minus_cart(request, product_id):
+#     if request.method == 'POST':
+#         current_user = request.user
+
+#         if current_user.is_authenticated:
+#             print("Authenticated user detected.")
+#             try:
+#                 cart = Cart.objects.get(user=current_user)
+#                 cart_item = get_object_or_404(CartItem, product__id=product_id, cart=cart)
+#                 print(f"Current item quantity: {cart_item.quantity}")
+
+#                 if cart_item.quantity > 1:
+#                     cart_item.quantity -= 1  # Decrease the quantity
+#                     cart_item.save()  # Save changes
+#                     messages.success(request, "Item quantity decreased.")
+#                 else:
+#                     cart_item.delete()  # Remove item if quantity is 0
+#                     messages.success(request, "Item removed from cart.")
+                
+#                 return JsonResponse({'status': 'success', 'new_quantity': cart_item.quantity})
+
+#             except Cart.DoesNotExist:
+#                 messages.error(request, "Cart not found.")
+#                 print("Cart does not exist.")
+#                 return JsonResponse({'status': 'error', 'message': "Cart not found."}, status=404)
+#         else:
+#             print("Unauthenticated user detected.")
+#             if 'cart_items' in request.session:
+#                 session_cart_items = request.session['cart_items']
+#                 for item in session_cart_items:
+#                     if item['product_id'] == product_id:
+#                         print(f"Found item in session cart: {item}")
+#                         if item['quantity'] > 1:
+#                             item['quantity'] -= 1  # Decrease the quantity
+#                             messages.success(request, "Item quantity decreased.")
+#                         else:
+#                             session_cart_items.remove(item)  # Remove item if quantity is 0
+#                             messages.success(request, "Item removed from cart.")
+#                         break
+#                 else:
+#                     messages.error(request, "Item not found in session cart.")
+
+#                 request.session['cart_items'] = session_cart_items  # Update the session
+#             else:
+#                 messages.error(request, "You need to be logged in to modify the cart.")
+#     print("Minus Cart is called")
+#     return redirect('carts')
+
+
+def minus_cart(request, product_id, color, size):
     if request.method == 'POST':
         current_user = request.user
 
         if current_user.is_authenticated:
-            print("Authenticated user detected.")
             try:
                 cart = Cart.objects.get(user=current_user)
-                cart_item = get_object_or_404(CartItem, product__id=product_id, cart=cart)
-                print(f"Current item quantity: {cart_item.quantity}")
+                # Get the CartItem based on product_id, cart, color, and size
+                cart_item = get_object_or_404(CartItem, 
+                                               product__id=product_id,
+                                               cart=cart,
+                                               color=color, 
+                                               size=size)
 
                 if cart_item.quantity > 1:
                     cart_item.quantity -= 1  # Decrease the quantity
@@ -101,19 +227,21 @@ def minus_cart(request, product_id):
                     cart_item.delete()  # Remove item if quantity is 0
                     messages.success(request, "Item removed from cart.")
                 
-                return JsonResponse({'status': 'success', 'new_quantity': cart_item.quantity})
+                # return JsonResponse({'status': 'success', 'new_quantity': cart_item.quantity})
+                return redirect('carts')
 
             except Cart.DoesNotExist:
                 messages.error(request, "Cart not found.")
-                print("Cart does not exist.")
                 return JsonResponse({'status': 'error', 'message': "Cart not found."}, status=404)
+
         else:
-            print("Unauthenticated user detected.")
+            # Handle session cart logic
             if 'cart_items' in request.session:
                 session_cart_items = request.session['cart_items']
                 for item in session_cart_items:
-                    if item['product_id'] == product_id:
-                        print(f"Found item in session cart: {item}")
+                    if (item['product_id'] == product_id and 
+                        item['color'] == color and 
+                        item['size'] == size):
                         if item['quantity'] > 1:
                             item['quantity'] -= 1  # Decrease the quantity
                             messages.success(request, "Item quantity decreased.")
@@ -127,11 +255,9 @@ def minus_cart(request, product_id):
                 request.session['cart_items'] = session_cart_items  # Update the session
             else:
                 messages.error(request, "You need to be logged in to modify the cart.")
-    print("Minus Cart is called")
+
     return redirect('carts')
-
-
-
+    
 
 
 

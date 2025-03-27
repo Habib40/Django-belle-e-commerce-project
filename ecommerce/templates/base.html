@@ -122,10 +122,15 @@
                                 
                             </li>
                             
-                            <li class="lvl1 parent dropdown"><a href="#">Category <i class="anm anm-angle-down-l"></i></a>
+                            <li class="lvl1 parent dropdown">
+                                <a href="#">Category <i class="anm anm-angle-down-l"></i></a>
                                 <ul class="dropdown">
                                     {% for category in links %}
-                                        <li><a href="{{ category.get_url }}" class="site-nav">{{ category.name }}</a></li>
+                                        {% if category.slug %}  {# Check if slug is valid #}
+                                            <li><a href="{{ category.get_url }}" class="site-nav">{{ category.name }}</a></li>
+                                        {% else %}
+                                            <li><a href="#" class="site-nav">{{ category.name }}</a></li>  {# Fallback for categories without a slug #}
+                                        {% endif %}
                                     {% endfor %}
                                 </ul>
                             </li>

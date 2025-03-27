@@ -1,12 +1,14 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from .models import Order,OrderProduct,Payment
+import requests
 # Register your models here.
 class OrderAdmin(admin.ModelAdmin):
     list_display = (
         'order_number', 'get_payment_id', 'get_payment_method', 'cash_on_delivery',
         'full_name', 'email', 'order_total', 'status', 'created_at',
     )
+    actions = ['send_to_courier']
     search_fields = ('order_number', 'user__first_name', 'user__last_name', 'email')
     list_filter = ('status', 'created_at', 'country')
     ordering = ('-created_at',)
@@ -31,6 +33,41 @@ class OrderAdmin(admin.ModelAdmin):
     def get_payment_method(self, obj):
         return obj.payment.payment_method if obj.payment else "No Payment"
     get_payment_method.short_description = 'Payment Method'
+    
+    
+    def send_to_courier(self, request, queryset):
+        for order in queryset:
+            response = self.place_order(order)  # Call the function to place order
+            if response.status_code == 200:
+                order.status = 'Sent'  # Update order status
+                order.is_ordered = True
+                order.save()  # Save the updated order
+                self.message_user(request, f"Order {order.order_number} sent to courier successfully.")
+            else:
+                self.message_user(request, f"Failed to send order {order.order_number} to courier.", level='error')
+
+    def place_order(self, order):
+        api_key = 'f5be2olgolu0bfnodtuwk5suqbmgwthb'
+        secret_key = 'w5coe2d5ymtddlayeudhaffm'
+        base_url = 'https://portal.packzy.com/api/v1/create_order'
+        headers = {
+            "Api-Key": api_key,
+            "Secret-Key": secret_key,
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "invoice": order.order_number,
+            "recipient_name": f"{order.first_name} {order.last_name}",
+            "recipient_phone": order.phone,
+            "recipient_address": f"{order.address_line_1}, {order.address_line_2}, {order.city}, {order.state}, {order.country}",
+            "cod_amount": order.order_total if order.cash_on_delivery else 0,
+            "note": order.order_note
+        }
+        response = requests.post(base_url, json=payload, headers=headers)
+        return response
+
+    send_to_courier.short_description = "Send selected orders to courier"
+    
 
 admin.site.register(Order, OrderAdmin)
 

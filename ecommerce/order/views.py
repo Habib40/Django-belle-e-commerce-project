@@ -257,9 +257,6 @@ class CreatePaymentView(View):
         success_url = request.build_absolute_uri(reverse('payment_success'))
         cancel_url = request.build_absolute_uri(reverse('payment_cancel'))
 
-        logger.debug(f"Success URL: {success_url}")
-        logger.debug(f"Cancel URL: {cancel_url}")
-
         return render(request, 'orders/payment_form.html', {
             'success_url': success_url,
             'cancel_url': cancel_url,
@@ -285,9 +282,6 @@ class CreatePaymentView(View):
             "webhook_url": "https://yourdomain.com/webhook",
             "meta_data": json.dumps({"phone": order.phone})
         }
-
-        logger.debug(f"Payload for payment creation: {payload}")
-
         headers = {
             'API-KEY': settings.IT_PAY_BD_API_KEY,
             'Content-Type': 'application/json'
