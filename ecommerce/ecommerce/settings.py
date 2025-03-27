@@ -1,5 +1,5 @@
 # Import dj-database-url at the beginning of the file.
-# import dj_database_url
+import dj_database_url
 from pathlib import Path
 import os
 from dotenv import load_dotenv
@@ -116,19 +116,21 @@ AUTH_USER_MODEL = 'account.Account'
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
-
-
-# Database configuration
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',  # or your DB engine
-        'NAME': os.getenv('DATABASE_NAME'),
-        'USER': os.getenv('DATABASE_USER'),
-        'PASSWORD': os.getenv('DATABASE_PASSWORD'),
-        'HOST': os.getenv('DATABASE_HOST'),
-        'PORT': os.getenv('DATABASE_PORT', default='5432'),  # Set a default if needed
-    }
+    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
+
+# # Database configuration
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',  # or your DB engine
+#         'NAME': os.getenv('DATABASE_NAME'),
+#         'USER': os.getenv('DATABASE_USER'),
+#         'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+#         'HOST': os.getenv('DATABASE_HOST'),
+#         'PORT': os.getenv('DATABASE_PORT', default='5432'),  # Set a default if needed
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
