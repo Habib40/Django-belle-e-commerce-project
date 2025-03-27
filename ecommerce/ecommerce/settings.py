@@ -107,6 +107,27 @@ WSGI_APPLICATION = 'ecommerce.wsgi.application'
 AUTH_USER_MODEL = 'account.Account'
 
 
+# Determine which database configuration to use
+DATABASE_TYPE = os.getenv('DATABASE_TYPE', 'local')  # Default to 'local' if not set
+
+if DATABASE_TYPE == 'render':
+    # Use Render PostgreSQL database configuration
+    DATABASES = {
+        'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+    }
+else:
+    # Use local PostgreSQL database configuration
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',  # or your DB engine
+            'NAME': os.getenv('DATABASE_NAME'),
+            'USER': os.getenv('DATABASE_USER'),
+            'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+            'HOST': os.getenv('DATABASE_HOST'),
+            'PORT': os.getenv('DATABASE_PORT', default='5432'),  # Set a default if needed
+        }
+    }
+
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
@@ -116,11 +137,11 @@ AUTH_USER_MODEL = 'account.Account'
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
-DATABASES = {
-    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
-}
+# DATABASES = {
+#     'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+# }
 
-# # Database configuration
+# # # Database configuration
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',  # or your DB engine
