@@ -44,7 +44,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    
+    'simpleui',
     'whitenoise.runserver_nostatic',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -108,35 +108,9 @@ AUTH_USER_MODEL = 'account.Account'
 
 
 # Determine which database configuration to use
-DATABASE_TYPE = os.getenv('DATABASE_TYPE', 'local')  # Default to 'local' if not set
+# DATABASE_TYPE = os.getenv('DATABASE_TYPE', 'local')  # Default to 'local' if not set
 
-# Use local PostgreSQL database configuration
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',  # or your DB engine
-        'NAME': os.getenv('DATABASE_NAME'),
-        'USER': os.getenv('DATABASE_USER'),
-        'PASSWORD': os.getenv('DATABASE_PASSWORD'),
-        'HOST': os.getenv('DATABASE_HOST'),
-        'PORT': os.getenv('DATABASE_PORT', default='5432'),  # Set a default if needed
-    }
-}
-DATABASES['default'] = dj_database_url.parse(os.getenv('DATABASE_URL'))
-
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-# DATABASES = {
-#     'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
-# }
-
-# # # Database configuration
+# # Use local PostgreSQL database configuration
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',  # or your DB engine
@@ -147,6 +121,33 @@ DATABASES['default'] = dj_database_url.parse(os.getenv('DATABASE_URL'))
 #         'PORT': os.getenv('DATABASE_PORT', default='5432'),  # Set a default if needed
 #     }
 # }
+
+
+# Database
+# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
+
+
+# # Database configuration
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',  # or your DB engine
+        'NAME': os.getenv('DATABASE_NAME'),
+        'USER': os.getenv('DATABASE_USER'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+        'HOST': os.getenv('DATABASE_HOST'),
+        'PORT': os.getenv('DATABASE_PORT', default='5432'),  # Set a default if needed
+    }
+}
+
+DATABASES['default'] = dj_database_url.parse(os.getenv('DATABASE_URL'))
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -184,15 +185,19 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / "static"]
+# STATIC_URL = 'static/'
+# STATICFILES_DIRS = [BASE_DIR / "static"]
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = BASE_DIR/'media'
+
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR/'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 if not DEBUG:
     # Tell Django to copy static assets into a path called `staticfiles` (this is specific to Render)

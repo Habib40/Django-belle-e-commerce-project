@@ -95,3 +95,6 @@ def mark_as_approved(self, request, queryset):
     self.message_user(request, "Selected reviews have been marked as approved.")
 
 admin.site.register(WishList)
+
+
+
