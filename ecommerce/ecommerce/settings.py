@@ -38,7 +38,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG')
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['https://django-belle-e-commerce-project-5.onrender.com']
 
 
 # Application definition
@@ -149,6 +149,15 @@ DATABASES = {
 
 DATABASES['default'] = dj_database_url.parse(os.getenv('DATABASE_URL'))
 
+# Replace the SQLite DATABASES configuration with PostgreSQL:
+DATABASES = {
+    'default': dj_database_url.os.getenv(
+        'DATABASE_URL',
+        default='postgresql://postgres:postgres@localhost:5432/mysite',
+        conn_max_age=600)
+    
+    
+}
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
