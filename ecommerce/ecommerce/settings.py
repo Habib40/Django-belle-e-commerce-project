@@ -1,4 +1,5 @@
 # Import dj-database-url at the beginning of the file.
+
 import dj_database_url
 from pathlib import Path
 import os
@@ -186,6 +187,15 @@ TIME_ZONE = 'Asia/Dhaka'
 USE_I18N = True
 
 USE_TZ = True
+# Django-SimpleUi Configuration
+SIMPLEUI_HOME_INFO = False 
+SIMPLEUI_ANALYSIS = False 
+SIMPLEUI_DEFAULT_THEME = 'admin.lte.css'
+SIMPLEUI_DEFAULT_THEME = 'element.css'
+SIMPLEUI_DEFAULT_THEME = 'layui.css'
+SIMPLEUI_DEFAULT_THEME = 'purple.css'
+# replace default Logo image
+SIMPLEUI_LOGO = '/static/assets/images/logo.svg'
 
 
 # Static files (CSS, JavaScript, Images)
