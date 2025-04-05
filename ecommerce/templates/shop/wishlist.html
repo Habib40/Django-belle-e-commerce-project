@@ -39,7 +39,7 @@
                                         <a href="#"><img src="{{ item.wish_product.images.url }}" alt="{{ item.wish_product.title }}" /></a>
                                     </td>
                                     <td class="product-name">
-                                        <h4 class="no-margin"><a href="#">{{ item.wish_product.title }}</a></h4>
+                                        <h4 class="no-margin"><a href="#">{{ item.wish_product.title|truncatechars:40 }}</a></h4>
                                     </td>
                                     <td class="product-price text-center"><span class="amount">${{ item.wish_product.price }}</span></td>
                                     <td class="stock text-center">

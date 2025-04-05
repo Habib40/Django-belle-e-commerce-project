@@ -32,14 +32,14 @@ class ProductColorInline(admin.TabularInline):
 class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductImageInline, ProductColorInline]  # Include inline for managing product images
 
-    list_display = ('title', 'show_image', 'price', 'is_available', 'created_at')  # Use show_image to display image
+    list_display = ('title', 'show_image', 'price', 'is_available', 'created_at','get_plain_content')  # Use show_image to display image
     readonly_fields = ('discount_percentage',)  # Keep discount_percentage read-only
     prepopulated_fields = {'slug': ('title',)}  # Automatically generate slug from title
     readonly_fields = ('last_sold_time',) 
 
     fieldsets = (
         (None, {
-            'fields': ('title', 'slug', 'images', 'hoverImg', 'sku', 'category', 'description')
+            'fields': ('title', 'slug', 'images', 'hoverImg', 'sku', 'category', 'description','more_Information')
         }),
         ('Pricing', {
             'fields': ('price', 'discount_amount', 'compare_price', 'quantity_sold', 'quantity_left', 'stock')

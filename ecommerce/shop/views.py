@@ -65,6 +65,9 @@ def ProductDetail(request, category_slug, product_slug):
     # Calculate how long ago items were sold
       # Calculate how long ago items were sold
     sold_time = products.last_sold_time  # Replace with the actual field for sold time
+     # Fetch related products for the current product instance
+    related_products = products.related_products.all()  # Access related products from the specific instance
+    print(f"Related products count for {products.title}: {related_products.count()}")
 
     # Ensure sold_time is timezone-aware
     if sold_time and sold_time.tzinfo is None:
@@ -99,19 +102,12 @@ def ProductDetail(request, category_slug, product_slug):
         if len(recent_products) > 5:
             recent_products.pop(0)  # Remove the oldest viewed product
         request.session['recently_viewed'] = recent_products
-        
-        
-    print('recently_viewed_products')
-
-
     # Now filter ProductColor based on the product instance
     product_color = ProductColor.objects.filter(product=products)
-   
     # Get reviews for the product
     reviews = Review.objects.filter(product=products).order_by('-created_at')
     review_count = reviews.count()
     average_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
-
     # Handle review submission
     if request.method == 'POST':
         form = ReviewForm(request.POST)
@@ -125,18 +121,12 @@ def ProductDetail(request, category_slug, product_slug):
             messages.error(request, 'Please correct the errors below.')
     else:
         form = ReviewForm()
-
     # Fetch related images
     images = products.additional_images.all()
-
     # Calculate savings and discount percentage
     if products.price is not None:
         savings = products.price - (products.discount_amount or 0)
         discount_percentage = (savings / products.price * 100) if products.price else 0
-
-    
-    
-  
     # Prepare context for rendering
     context = {
         'current_time':current_time,
@@ -155,9 +145,10 @@ def ProductDetail(request, category_slug, product_slug):
         'review_count': review_count,
         'discount_percentage': round(discount_percentage),
         'recently_viewed_products': (recently_viewed_products),
+        'related_products': related_products,
         
     }
-    print(context)
+   
 
     return render(request, 'shop/productDetail.html', context)
 

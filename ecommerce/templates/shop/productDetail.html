@@ -118,13 +118,14 @@
                                         </div>
                                     
                                     
-                                <div class="product-single__description rte">
+                                <!-- <div class="product-single__description rte">
                                     <ul>
                                         <li>{{products.description}}</li> 
+                                        <li>{{products.more_Information|safe}}</li> 
                                         
                                     </ul>
 
-                                </div>
+                                </div> -->
                                 {% if quantity_left <= 4 %}
                                 <div id="quantity_message">
                                     Hurry! Only <span class="items">{{ quantity_left }}</span> left in stock.
@@ -168,7 +169,7 @@
                                     </p>
                                     
                                     <div class="product-action clearfix">
-                                        <div class="product-form__item--quantity">
+                                        <!-- <div class="product-form__item--quantity">
                                             <div class="wrapQtyBtn">
                                                 <div class="qtyField">
                                                     <a class="qtyBtn minus" href="javascript:void(0);"><i class="fa anm anm-minus-r" aria-hidden="true"></i></a>
@@ -176,21 +177,21 @@
                                                     <a class="qtyBtn plus" href="javascript:void(0);"><i class="fa anm anm-plus-r" aria-hidden="true"></i></a>
                                                 </div>
                                             </div>
-                                        </div>                                
+                                        </div>                                 -->
                                         <div class="product-form__item--submit">
                                             <button type="submit" name="add" class="btn product-form__cart-submit">
                                                 <span>Add to Cart</span>
                                             </button>
                                         </div>
-                                        <div class="shopify-payment-button" data-shopify="payment-button">
+                                        <!-- <div class="shopify-payment-button" data-shopify="payment-button">
                                             <button type="button" class="shopify-payment-button__button shopify-payment-button__button--unbranded">Buy it now</button>
-                                        </div>
+                                        </div> -->
                                     </div>
                                 </form>
                                 <div class="display-table shareRow">
                                         <div class="display-table-cell medium-up--one-third">
                                             <div class="wishlist-btn">
-                                                <a class="wishlist add-to-wishlist" href="#" title="Add to Wishlist"><i class="icon anm anm-heart-l" aria-hidden="true"></i> <span>Add to Wishlist</span></a>
+                                                <a class="wishlist add-to-wishlist" href="{% url 'add_to_wishlist' products.id %}" title="Add to Wishlist"><i class="icon anm anm-heart-l" aria-hidden="true"></i> <span>Add to Wishlist</span></a>
                                             </div>
                                         </div>
                                         <div class="display-table-cell text-right">
@@ -235,7 +236,8 @@
                         </div>
                         <div class="col-12 col-sm-6 col-md-6 col-lg-3 feature">
                             <img src="{% static 'assets/images/phone-call.png' %}" alt="Hotline" title="Hotline" />
-                            <div class="details"><h3>Hotline</h3>Talk to help line for your question on 4141 456 789, 4125 666 888</div>
+                            <div class="details"><h3>Hotline</h3>Talk to help line for your question on
+                            <p class="phone-no"></i><a href="https://wa.me/+8801744194831?" class="phone-no"><i class="anm anm-phone-s"></i> WhatsApp</a></p></div>
                         </div>
                     </div>
                 </div>
@@ -251,29 +253,7 @@
                     <div class="tab-container">
                         <div id="tab1" class="tab-content">
                             <div class="product-description rte">
-                                <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.</p>
-                                <ul>
-                                  <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit</li>
-                                  <li>Sed ut perspiciatis unde omnis iste natus error sit</li>
-                                  <li>Neque porro quisquam est qui dolorem ipsum quia dolor</li>
-                                  <li>Lorem Ipsum is not simply random text.</li>
-                                  <li>Free theme updates</li>
-                                </ul>
-                                <h3>Sed ut perspiciatis unde omnis iste natus error sit voluptatem</h3>
-                                <p>You can change the position of any sections such as slider, banner, products, collection and so on by just dragging and dropping.&nbsp;</p>
-                                <h3>Lorem Ipsum is not simply random text.</h3>
-<p>But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness.</p>
-                                <p>Change colors, fonts, banners, megamenus and more. Preview changes are live before saving them.</p>
-                                <h3>1914 translation by H. Rackham</h3>
-                                <p>But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness.</p>
-                                <h3>Section 1.10.33 of "de Finibus Bonorum et Malorum", written by Cicero in 45 BC</h3>
-                                <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga.</p>
-                                <h3>The standard Lorem Ipsum passage, used since the 1500s</h3>
-                                <p>You can use variant style from colors, images or variant images. Also available differnt type of design styles and size.</p>
-                                <h3>Lorem Ipsum is not simply random text.</h3>
-<p>But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness.</p>
-                                <h3>Proin ut lacus eget elit molestie posuere.</h3>
-                                <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled.</p>
+                                <p>{{products.more_Information|safe}}</p>
                             </div>
                         </div>
                         
@@ -288,8 +268,8 @@
                                             </span>
                                         </div>
                                     </div>
-                                    {% load form_extras %}
 
+                                    {% load form_extras %}
                                     <div class="spr-content">
                                         
                                         <div class="spr-reviews-summary mb-4">
@@ -479,11 +459,13 @@
                       </div>
                         
                         <div id="tab4" class="tab-content">
-                            <h4>Returns Policy</h4>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce eros justo, accumsan non dui sit amet. Phasellus semper volutpat mi sed imperdiet. Ut odio lectus, vulputate non ex non, mattis sollicitudin purus. Mauris consequat justo a enim interdum, in consequat dolor accumsan. Nulla iaculis diam purus, ut vehicula leo efficitur at.</p>
-                            <p>Interdum et malesuada fames ac ante ipsum primis in faucibus. In blandit nunc enim, sit amet pharetra erat aliquet ac.</p>
-                            <h4>Shipping</h4>
-                            <p>Pellentesque ultrices ut sem sit amet lacinia. Sed nisi dui, ultrices ut turpis pulvinar. Sed fringilla ex eget lorem consectetur, consectetur blandit lacus varius. Duis vel scelerisque elit, et vestibulum metus.  Integer sit amet tincidunt tortor. Ut lacinia ullamcorper massa, a fermentum arcu vehicula ut. Ut efficitur faucibus dui Nullam tristique dolor eget turpis consequat varius. Quisque a interdum augue. Nam ut nibh mauris.</p>
+                            <h4>Shipping Policy:</h4>
+                            <p>
+                                We offer fast and reliable shipping options to ensure your order reaches you promptly. Standard shipping typically takes 3-5 business days, while expedited options are available at checkout. Once your order is shipped, you will receive a tracking number via email.
+                            </p>
+                            
+                            <h4>Returns Policy:</h4>
+                            <p>Customer satisfaction is our priority. If you're not completely satisfied with your purchase, you may return it within 30 days of receipt for a full refund or exchange. Items must be in their original condition and packaging. To initiate a return, please contact our customer service team for further instructions.</p>
                         </div>
                     </div>
                 </div>
@@ -493,36 +475,38 @@
                 <div class="related-product grid-products">
                     <header class="section-header">
                         <h2 class="section-header__title text-center h2"><span>Related Products</span></h2>
-                        <p class="sub-heading">You can stop autoplay, increase/decrease aniamtion speed and number of grid to show and products from store admin.</p>
+                        <!-- <p class="sub-heading">You can stop autoplay, increase/decrease aniamtion speed and number of grid to show and products from store admin.</p> -->
                     </header>
+                    
                     <div class="productPageSlider">
+                        {% if related_products %}
+                        {% for product in related_products %}
                         <div class="col-12 item">
                             <!-- start product image -->
-                            <div class="product-image">
+                            <div class="product-image" >
                                 <!-- start product image -->
-                                <a href="#">
+                                <a href="{% url 'store' %}">
                                     <!-- image -->
-                                    <img class="primary blur-up lazyload" data-src="{% static 'assets/images/product-images/product-image1.jpg' %}" src="{% static 'assets/images/product-images/product-image1.jpg' %}" alt="image" title="product">
+                                    <img class="primary blur-up lazyload" style="height: 250px;" data-src="{{product.images.url}}" src="assets/images/product-images/product-image3.jpg" alt="image" title="product">
                                     <!-- End image -->
                                     <!-- Hover image -->
-                                    <img class="hover blur-up lazyload" data-src="{% static 'assets/images/product-images/product-image1-1.jpg' %}" src="assets/images/product-images/product-image1-1.jpg" alt="image" title="product">
+                                    <img class="hover blur-up lazyload" style="height: 250px;" data-src="{{product.hoverImg.url}}" alt="image" title="product">
                                     <!-- End hover image -->
                                     <!-- product label -->
-                                    <div class="product-labels rectangular"><span class="lbl on-sale">-16%</span> <span class="lbl pr-label1">new</span></div>
+                                    <div class="product-labels rectangular"><span class="lbl pr-label2">{{product.labels}}</span></div>
                                     <!-- End product label -->
                                 </a>
                                 <!-- end product image -->
-    
                                 <!-- Start product button -->
-                                <form class="variants add" action="#" onclick="window.location.href='cart.html'"method="post">
+                                <!-- <form class="variants add" action="#" onclick="window.location.href='cart.html'"method="post">
                                     <button class="btn btn-addto-cart" type="button" tabindex="0">Select Options</button>
-                                </form>
+                                </form> -->
                                 <div class="button-set">
                                     <a href="#" title="Quick View" class="quick-view" tabindex="0">
                                         <i class="icon anm anm-search-plus-r"></i>
                                     </a>
                                     <div class="wishlist-btn">
-                                        <a class="wishlist add-to-wishlist" href="wishlist.html">
+                                        <a class="wishlist add-to-wishlist" href="{% url 'add_to_wishlist' product.id %}">
                                             <i class="icon anm anm-heart-l"></i>
                                         </a>
                                     </div>
@@ -534,146 +518,12 @@
                             <div class="product-details text-center">
                                 <!-- product name -->
                                 <div class="product-name">
-                                    <a href="#">Edna Dress</a>
+                                    <a href="{% url 'store' %}">{{product.title|truncatechars:34}}</a>
                                 </div>
                                 <!-- End product name -->
                                 <!-- product price -->
                                 <div class="product-price">
-                                    <span class="old-price">$500.00</span>
-                                    <span class="price">$600.00</span>
-                                </div>
-                                <!-- End product price -->
-                                
-                                <div class="product-review">
-                                    <i class="font-13 fa fa-star"></i>
-                                    <i class="font-13 fa fa-star"></i>
-                                    <i class="font-13 fa fa-star"></i>
-                                    <i class="font-13 fa fa-star-o"></i>
-                                    <i class="font-13 fa fa-star-o"></i>
-                                </div>
-                                <!-- Variant -->
-                                <ul class="swatches">
-                                    <li class="swatch medium rounded"><img src="{% static 'assets/images/product-images/variant2.jpg' %}" alt="image" /></li>
-                                    <li class="swatch medium rounded"><img src="{% static 'assets/images/product-images/variant3.jpg' %}" alt="image" /></li>
-                                    <li class="swatch medium rounded"><img src="{% static 'assets/images/product-images/variant4.jpg' %}" alt="image" /></li>
-                                    <li class="swatch medium rounded"><img src="{% static 'assets/images/product-images/variant5.jpg' %}" alt="image" /></li>
-                                    <li class="swatch medium rounded"><img src="{% static 'assets/images/product-images/variant6.jpg' %}" alt="image" /></li>
-                                </ul>
-                                <!-- End Variant -->
-                            </div>
-                            <!-- End product details -->
-                        </div>
-                        <div class="col-12 item">
-                            <!-- start product image -->
-                            <div class="product-image">
-                                <!-- start product image -->
-                                <a href="#">
-                                    <!-- image -->
-                                    <img class="primary blur-up lazyload" data-src="{% static 'assets/images/product-images/product-image2.jpg' %}" src="assets/images/product-images/product-image2.jpg" alt="image" title="product">
-                                    <!-- End image -->
-                                    <!-- Hover image -->
-                                    <img class="hover blur-up lazyload" data-src="{% static 'assets/images/product-images/product-image2-1.jpg' %}" src="assets/images/product-images/product-image2-1.jpg" alt="image" title="product">
-                                    <!-- End hover image -->
-                                </a>
-                                <!-- end product image -->
-    
-                                <!-- Start product button -->
-                                <form class="variants add" action="#" onclick="window.location.href='cart.html'"method="post">
-                                    <button class="btn btn-addto-cart" type="button" tabindex="0">Select Options</button>
-                                </form>
-                                <div class="button-set">
-                                    <a href="#" title="Quick View" class="quick-view" tabindex="0">
-                                        <i class="icon anm anm-search-plus-r"></i>
-                                    </a>
-                                    <div class="wishlist-btn">
-                                        <a class="wishlist add-to-wishlist" href="wishlist.html">
-                                            <i class="icon anm anm-heart-l"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                                <!-- end product button -->
-                            </div>
-                            <!-- end product image -->
-    
-                            <!--start product details -->
-                            <div class="product-details text-center">
-                                <!-- product name -->
-                                <div class="product-name">
-                                    <a href="#">Elastic Waist Dress</a>
-                                </div>
-                                <!-- End product name -->
-                                <!-- product price -->
-                                <div class="product-price">
-                                    <span class="price">$748.00</span>
-                                </div>
-                                <!-- End product price -->
-                                <div class="product-review">
-                                    <i class="font-13 fa fa-star"></i>
-                                    <i class="font-13 fa fa-star"></i>
-                                    <i class="font-13 fa fa-star"></i>
-                                    <i class="font-13 fa fa-star"></i>
-                                    <i class="font-13 fa fa-star"></i>
-                                </div>
-                                <!-- Variant -->
-                                <ul class="swatches">
-                                    <li class="swatch medium rounded"><img src="{% static 'assets/images/product-images/variant2-1.jpg' %}" alt="image" /></li>
-                                    
-                                    <li class="swatch medium rounded"><img src="{% static 'assets/images/product-images/variant2-2.jpg' %}" alt="image" /></li>
-                                    
-                                    <li class="swatch medium rounded"><img src="{% static 'assets/images/product-images/variant2-3.jpg' %}" alt="image" /></li>
-                                    
-                                    <li class="swatch medium rounded"><img src="{% static 'assets/images/product-images/variant2-4.jpg' %}" alt="image" /></li>
-                                    
-                                </ul>
-                                <!-- End Variant -->
-                            </div>
-                            <!-- End product details -->
-                        </div>
-                        <div class="col-12 item">
-                            <!-- start product image -->
-                            <div class="product-image">
-                                <!-- start product image -->
-                                <a href="#">
-                                    <!-- image -->
-                                    <img class="primary blur-up lazyload" data-src="{% static 'assets/images/product-images/product-image3.jpg' %}" src="assets/images/product-images/product-image3.jpg" alt="image" title="product">
-                                    <!-- End image -->
-                                    <!-- Hover image -->
-                                    <img class="hover blur-up lazyload" data-src="{% static 'assets/images/product-images/product-image3-1.jpg' %}" src="assets/images/product-images/product-image3-1.jpg" alt="image" title="product">
-                                    <!-- End hover image -->
-                                    <!-- product label -->
-                                    <div class="product-labels rectangular"><span class="lbl pr-label2">Hot</span></div>
-                                    <!-- End product label -->
-                                </a>
-                                <!-- end product image -->
-    
-                                <!-- Start product button -->
-                                <form class="variants add" action="#" onclick="window.location.href='cart.html'"method="post">
-                                    <button class="btn btn-addto-cart" type="button" tabindex="0">Select Options</button>
-                                </form>
-                                <div class="button-set">
-                                    <a href="#" title="Quick View" class="quick-view" tabindex="0">
-                                        <i class="icon anm anm-search-plus-r"></i>
-                                    </a>
-                                    <div class="wishlist-btn">
-                                        <a class="wishlist add-to-wishlist" href="wishlist.html">
-                                            <i class="icon anm anm-heart-l"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                                <!-- end product button -->
-                            </div>
-                            <!-- end product image -->
-    
-                            <!--start product details -->
-                            <div class="product-details text-center">
-                                <!-- product name -->
-                                <div class="product-name">
-                                    <a href="#">3/4 Sleeve Kimono Dress</a>
-                                </div>
-                                <!-- End product name -->
-                                <!-- product price -->
-                                <div class="product-price">
-                                    <span class="price">$550.00</span>
+                                    <span class="price">${{product.discount_amount}}</span>
                                 </div>
                                 <!-- End product price -->
                                 
@@ -684,153 +534,20 @@
                                     <i class="font-13 fa fa-star"></i>
                                     <i class="font-13 fa fa-star-o"></i>
                                 </div>
-                                <!-- Variant -->
-                                <ul class="swatches">
-                                    <li class="swatch medium rounded"><img src="{% static 'assets/images/product-images/variant3-1.jpg' %}" alt="image" /></li>
-                                    <li class="swatch medium rounded"><img src="{% static 'assets/images/product-images/variant3-2.jpg' %}" alt="image" /></li>
-                                    <li class="swatch medium rounded"><img src="{% static 'assets/images/product-images/variant3-3.jpg' %}" alt="image" /></li>
-                                    <li class="swatch medium rounded"><img src="{% static 'assets/images/product-images/variant3-4.jpg' %}" alt="image" /></li>
-                                    
-                                </ul>
-                                <!-- End Variant -->
+                               
                             </div>
+                            
                             <!-- End product details -->
                         </div>
-                        <div class="col-12 item">
-                            <!-- start product image -->
-                            <div class="product-image">
-                                <!-- start product image -->
-                                <a href="#">
-                                    <!-- image -->
-                                    <img class="primary blur-up lazyload" data-src="{% static 'assets/images/product-images/product-image2.jpg' %}" src="assets/images/product-images/product-image2.jpg" alt="image" title="product">
-                                    <!-- End image -->
-                                    <!-- Hover image -->
-                                    <img class="hover blur-up lazyload" data-src="{% static 'assets/images/product-images/product-image2-1.jpg' %}" src="assets/images/product-images/product-image2-1.jpg" alt="image" title="product">
-                                    <!-- End hover image -->
-                                </a>
-                                <!-- end product image -->
-    
-                                <!-- Start product button -->
-                                <form class="variants add" action="#" onclick="window.location.href='cart.html'"method="post">
-                                    <button class="btn btn-addto-cart" type="button" tabindex="0">Select Options</button>
-                                </form>
-                                <div class="button-set">
-                                    <a href="#" title="Quick View" class="quick-view" tabindex="0">
-                                        <i class="icon anm anm-search-plus-r"></i>
-                                    </a>
-                                    <div class="wishlist-btn">
-                                        <a class="wishlist add-to-wishlist" href="wishlist.html">
-                                            <i class="icon anm anm-heart-l"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                                <!-- end product button -->
-                            </div>
-                            <!-- end product image -->
-    
-                            <!--start product details -->
-                            <div class="product-details text-center">
-                                <!-- product name -->
-                                <div class="product-name">
-                                    <a href="#">Elastic Waist Dress</a>
-                                </div>
-                                <!-- End product name -->
-                                <!-- product price -->
-                                <div class="product-price">
-                                    <span class="price">$748.00</span>
-                                </div>
-                                <!-- End product price -->
-                                <div class="product-review">
-                                    <i class="font-13 fa fa-star"></i>
-                                    <i class="font-13 fa fa-star"></i>
-                                    <i class="font-13 fa fa-star"></i>
-                                    <i class="font-13 fa fa-star"></i>
-                                    <i class="font-13 fa fa-star"></i>
-                                </div>
-                                <!-- Variant -->
-                                <ul class="swatches">
-                                    <li class="swatch medium rounded"><img src="{% static 'assets/images/product-images/variant2-1.jpg' %}" alt="image" /></li>
-                                    
-                                    <li class="swatch medium rounded"><img src="{% static 'assets/images/product-images/variant2-2.jpg' %}" alt="image" /></li>
-                                    
-                                    <li class="swatch medium rounded"><img src="{% static 'assets/images/product-images/variant2-3.jpg' %}" alt="image" /></li>
-                                    
-                                    <li class="swatch medium rounded"><img src="{% static 'assets/images/product-images/variant2-4.jpg' %}" alt="image" /></li>
-                                    
-                                </ul>
-                                <!-- End Variant -->
-                            </div>
-                            <!-- End product details -->
-                        </div>
-                        <div class="col-12 item">
-                            <!-- start product image -->
-                            <div class="product-image">
-                                <!-- start product image -->
-                                <a href="#">
-                                    <!-- image -->
-                                    <img class="primary blur-up lazyload" data-src="{% static 'assets/images/product-images/product-image3.jpg' %}" src="assets/images/product-images/product-image3.jpg" alt="image" title="product">
-                                    <!-- End image -->
-                                    <!-- Hover image -->
-                                    <img class="hover blur-up lazyload" data-src="{% static 'assets/images/product-images/product-image3-1.jpg' %}" src="assets/images/product-images/product-image3-1.jpg" alt="image" title="product">
-                                    <!-- End hover image -->
-                                    <!-- product label -->
-                                    <div class="product-labels rectangular"><span class="lbl pr-label2">Hot</span></div>
-                                    <!-- End product label -->
-                                </a>
-                                <!-- end product image -->
-    
-                                <!-- Start product button -->
-                                <form class="variants add" action="#" onclick="window.location.href='cart.html'"method="post">
-                                    <button class="btn btn-addto-cart" type="button" tabindex="0">Select Options</button>
-                                </form>
-                                <div class="button-set">
-                                    <a href="#" title="Quick View" class="quick-view" tabindex="0">
-                                        <i class="icon anm anm-search-plus-r"></i>
-                                    </a>
-                                    <div class="wishlist-btn">
-                                        <a class="wishlist add-to-wishlist" href="wishlist.html">
-                                            <i class="icon anm anm-heart-l"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                                <!-- end product button -->
-                            </div>
-                            <!-- end product image -->
-    
-                            <!--start product details -->
-                            <div class="product-details text-center">
-                                <!-- product name -->
-                                <div class="product-name">
-                                    <a href="#">3/4 Sleeve Kimono Dress</a>
-                                </div>
-                                <!-- End product name -->
-                                <!-- product price -->
-                                <div class="product-price">
-                                    <span class="price">$550.00</span>
-                                </div>
-                                <!-- End product price -->
-                                
-                                <div class="product-review">
-                                    <i class="font-13 fa fa-star"></i>
-                                    <i class="font-13 fa fa-star"></i>
-                                    <i class="font-13 fa fa-star"></i>
-                                    <i class="font-13 fa fa-star"></i>
-                                    <i class="font-13 fa fa-star-o"></i>
-                                </div>
-                                <!-- Variant -->
-                                <ul class="swatches">
-                                    <li class="swatch medium rounded"><img src="{% static 'assets/images/product-images/variant3-1.jpg' %}" alt="image" /></li>
-                                    <li class="swatch medium rounded"><img src="{% static 'assets/images/product-images/variant3-2.jpg' %}" alt="image" /></li>
-                                    <li class="swatch medium rounded"><img src="{% static 'assets/images/product-images/variant3-3.jpg' %}" alt="image" /></li>
-                                    <li class="swatch medium rounded"><img src="{% static 'assets/images/product-images/variant3-4.jpg' %}" alt="image" /></li>
-                                    
-                                </ul>
-                                <!-- End Variant -->
-                            </div>
-                            <!-- End product details -->
-                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <p>No Related Products Found </p>
+                        {% endif %}
+
+
                         
                     </div>
+                    
                     </div>
                 <!--End Related Product Slider-->
                 
@@ -865,9 +582,10 @@
 
                                 <!--start product details -->
                                 <div class="product-details text-center">
+                                    <h6>${{recent.discount_amount}}</h6>
                                     <!-- product name -->
                                     <div class="product-name">
-                                        <a href="{% url 'store' %}">{{recent.title}}</a>
+                                        <a href="{% url 'store' %}">{{recent.title|truncatechars:34}}</a>
                                     </div>
                                     <!-- End product name -->
                                 </div>

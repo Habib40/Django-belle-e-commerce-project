@@ -9,7 +9,10 @@ from datetime import datetime, timedelta
 from django.urls import reverse
 from account.models import Account
 from order.models import Order,OrderProduct
-
+from tinymce.models import HTMLField
+from django.utils.html import strip_tags 
+import re
+import html
 
 # Define product labels
 LABELS = (
@@ -65,6 +68,7 @@ class Product(models.Model):
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     discount_percentage = models.PositiveIntegerField(null=True, blank=True)
     description = models.TextField()
+    more_Information = HTMLField(null=True, blank=True)
     compare_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     quantity_sold = models.PositiveIntegerField(default=0)
     quantity_left = models.PositiveIntegerField(default=0)
@@ -77,7 +81,17 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     is_available = models.BooleanField(default=True)
 
+    def get_plain_content(self):
+        # Strip HTML tags
+        plain_text = strip_tags(self.more_Information) if self.more_Information else ''
+        
+        # Unescape HTML entities first and then replace multiple spaces
+        plain_text = html.unescape(plain_text)  # Convert HTML entities to plain text
+        
+        # Replace multiple spaces (including &nbsp;) with a single space
+        plain_text = re.sub(r'\s+', ' ', plain_text).strip()
 
+        return plain_text
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)

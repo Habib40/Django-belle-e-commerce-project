@@ -87,7 +87,7 @@
                         </div>
                         <div class="product-details text-center">
                             <div class="product-name">
-                                <a href="product-layout-1.html">{{ item.title }}</a>
+                                <a href="product-layout-1.html">{{ item.title|truncatechars:40 }}</a>
                             </div>
                             <div class="product-price">
                                 <span class="old-price">{{ item.price }} </span>
@@ -298,7 +298,7 @@
                     <div class="product-details text-center">
                         <!-- product name -->
                         <div class="product-name">
-                            <a href="product-layout-1.html">{{ new.title }}</a>
+                            <a href="product-layout-1.html">{{ new.title|truncatechars:40}}</a>
                         </div>
                         <!-- End product name -->
                         <!-- product price -->

@@ -60,6 +60,8 @@ INSTALLED_APPS = [
     'account',
     'Api_APP',
     'promotions',
+    'customApp',
+    'tinymce',
     
 ]
 
@@ -73,6 +75,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'customApp.middleware.middleware.Custom404Middleware', # Custom middleware for 404 error page
 ]
 
 ROOT_URLCONF = 'ecommerce.urls'
@@ -241,3 +244,39 @@ ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = ['https://*', 'http://*']  # Be more specific in production
 CORS_ALLOW_ALL_ORIGINS = True  # For django-cors-headers
 CORS_ORIGIN_ALLOW_ALL = True
+
+# Tinymce settings
+TINYMCE_DEFAULT_CONFIG = {
+    'theme': 'silver',  # Theme can be 'silver', 'modern', etc.
+    'height': 400,  # Increased height for better visibility
+    'width': 800,  # Width of the editor
+    'plugins': 'link image code lists table paste help',  # Additional plugins
+    'images_upload_url': '/tinymce/upload/',  # URL for image uploads
+    'automatic_uploads': True,  # Automatically upload images
+    'file_picker_types': 'image',  # Allow only images in the file picker
+    'toolbar': 'undo redo | styleselect | bold italic | underline | forecolor backcolor | alignleft aligncenter alignright | bullist numlist outdent indent | link image | code | help',  # Custom toolbar layout
+    'toolbar_location': 'top',  # Position of the toolbar
+    'relative_urls': False,  # Use absolute URLs
+    'remove_script_host': False,  # Keep the host in URLs
+    'convert_urls': True,  # Convert URLs
+    'content_css': '/static/css/content.css',  # Path to custom CSS for the content
+    'file_picker_callback': 'function(callback, value, meta) { /* Custom file picker */ }',  # Custom file picker function
+    'branding': False,  # Disable branding
+    'statusbar': False,  # Hide the status bar
+    'menubar': False, # Disable the menubar
+}
+
+# # settings.py
+# TINYMCE_DEFAULT_CONFIG = {
+#     'theme': 'silver',
+#     'height': 400,
+#     'width': 800,
+#     'plugins': 'link image code lists table paste help',
+#     'toolbar': 'undo redo | styleselect | bold italic | underline | forecolor backcolor | alignleft aligncenter alignright | bullist numlist outdent indent | link image | code | help',
+    
+#     'menubar': False, # Disable the menubar
+#     'toolbar_items_size': 'small', # Make the toolbar items smaller
+#     'branding': False,  # Disable branding
+#     'statusbar': False,  # Hide the status bar
+#     'object_resizing': 'true',  # Enable object resizing
+# }
