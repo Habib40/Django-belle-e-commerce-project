@@ -36,155 +36,103 @@
                 {% endif %}
             </div>
         </div>
-    <div class="container">
-        <div class="row">         
-            <div class="col-12 col-sm-12 col-md-8 col-lg-8 main-col">
-                    <table>
-                        <thead class="cart__row cart__header">
-                            <tr>
-                                <th colspan="" class="text-center">Product</th>
-                                <th class="text-center">Price</th>
-                                <th class="text-center">Quantity</th>
-                                <th class="text-right">Total</th>
-                                <th class="action">&nbsp;</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in cart_items %}
-                            <tr class="cart__row border-bottom line1 cart-flex border-top">
-                                <td class="cart__image-wrapper cart-flex-item">
-                                    <a href="#"><img class="cart__image" src="{{ item.product.images.url }}" alt="{{ item.product.title }}"></a>
-                                </td>
-                                <td class="cart__meta small--text-left cart-flex-item">
-                                    <div class="list-view-item__title">
-                                        <a href="{{ item.product.get_url }}">{{ item.product.title }}</a>
+     <!-- Cart Start -->
+     <div class="container-fluid pt-1">
+        <div class="row px-xl-5">
+            <div class="col-lg-8 table-responsive mb-5">
+                <table class="table table-bordered text-center mb-0">
+                    <thead class="bg-secondary text-dark">
+                        <tr>
+                            <th>Products</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody class="align-middle">
+                        {% for item in cart_items %}
+                        <tr>
+                            <td class="align-middle"><img src="{{ item.product.images.url }}" alt="" style="width: 50px;"> {{ item.product.title|truncatechars:30 }}
+                            <br><br>
+                            <h6><p style="color: aqua; background: black; padding-left:10px">
+                            Color: {{ item.color }}<br>
+                            Size: {{ item.size }}<br>
+                            </p></h6>
+                        </td>
+                            
+                            <td class="align-middle">${{ item.product.discount_amount }}</td>
+                            <td class="cart__update-wrapper cart-flex-item text-right">
+                                <div class="cart__qty text-center">
+                                    <div class="qtyField">
+                                       <!-- Form for Decreasing Quantity -->
+                                        <form method="POST" action="{% url 'minus_cart' item.product.id item.color item.size %}" style="display:inline;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="color" value="{{ item.color }}">
+                                            <input type="hidden" name="size" value="{{ item.size }}">
+                                            <button type="submit" class="qtyBtn minus" title="Decrease Quantity" onclick="return confirm('Decrease quantity?');">
+                                                <i class="icon icon-minus"></i>
+                                            </button>
+                                        </form>
+                                                                                    
+                                        <!-- Quantity Input -->
+                                        <input class="cart__qty-input qty" type="text" name="quantity" id="qty_{{ item.id }}" value="{{ item.quantity }}" readonly>
+                                        
+                                        <!-- Form for Increasing Quantity -->
+                                        <form method="POST" action="{% url 'addToCart' item.product.id %}" style="display:inline;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="color" value="{{ item.color }}">
+                                            <input type="hidden" name="size" value="{{ item.size }}">
+                                            <button type="submit" class="qtyBtn plus" title="Increase Quantity">
+                                                <i class="icon icon-plus"></i>
+                                            </button>
+                                        </form>
                                     </div>
-                                    <div class="cart__meta-text">
-                                        Color: {{ item.color }}<br>
-                                        Size: {{ item.size }}<br>
-                                    </div>
-                                </td>
-                                <td class="cart__price-wrapper cart-flex-item">
-                                    <span class="money">${{ item.product.discount_amount }}</span>
-                                </td>
-                                <td class="cart__update-wrapper cart-flex-item text-right">
-                                    <div class="cart__qty text-center">
-                                        <div class="qtyField">
-                                           <!-- Form for Decreasing Quantity -->
-                                            <form method="POST" action="{% url 'minus_cart' item.product.id item.color item.size %}" style="display:inline;">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="color" value="{{ item.color }}">
-                                                <input type="hidden" name="size" value="{{ item.size }}">
-                                                <button type="submit" class="qtyBtn minus" title="Decrease Quantity" onclick="return confirm('Decrease quantity?');">
-                                                    <i class="icon icon-minus"></i>
-                                                </button>
-                                            </form>
-                                                                                        
-                                            <!-- Quantity Input -->
-                                            <input class="cart__qty-input qty" type="text" name="quantity" id="qty_{{ item.id }}" value="{{ item.quantity }}" readonly>
-                                            
-                                            <!-- Form for Increasing Quantity -->
-                                            <form method="POST" action="{% url 'addToCart' item.product.id %}" style="display:inline;">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="color" value="{{ item.color }}">
-                                                <input type="hidden" name="size" value="{{ item.size }}">
-                                                <button type="submit" class="qtyBtn plus" title="Increase Quantity">
-                                                    <i class="icon icon-plus"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="text-right small--hide cart-price">
-                                    <div><span class="money">${{ item.sub_total }}</span></div>
-                                </td>
-                                
-                                
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="6" class="text-center">Your cart is empty.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="3" class="text-left">
-                                    <a href="{% url 'store' %}" class="btn--link cart-continue">
-                                        <i class="icon icon-arrow-circle-left"></i> Continue shopping
-                                    </a>
-                                </td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                    <div class="currencymsg">
-                        We process all orders in USD. While the content of your cart is currently displayed in USD, the checkout will use USD at the most current exchange rate.
-                    </div>
-                
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">Your cart is empty.</td>
+                        </tr>
+                        {% endfor %}
+                        
+                    </tbody>
+                </table>
             </div>
-
-            <div class="col-12 col-sm-12 col-md-4 col-lg-4 cart__footer" style="background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 20px; border-radius: 5px;">
-    <div class="solid-border">
-        <!-- Coupon section -->
-        <div class="card-body">
-            <div class="customer-box customer-coupon">
-                <h5 class="font-weight-bold" style="font-size: 1.5rem; color: #d57070;">
-                    <i class="icon anm anm-gift-l"></i>
-                    Have a coupon?
-                    <a href="#have-coupon" class="btn btn-outline-primary d-flex btn-block" style="border-color: #8fbae8; color: #92c2f6;" data-toggle="collapse" style="color: #007bff; font-weight: bold; font-size: 1.2rem;"> 
-                        CLICK HERE TO ENTER YOUR CODE
-                    </a>
-                </h5>
-                <div id="have-coupon" class="collapse coupon-checkout-content mt-4">
-                    <div class="discount-coupon" style="background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 5px; padding: 15px;">
-                        <p class="mb-2" style="font-size: 1rem; color: #666;">Enter your coupon code if you have one.</p>
-                        <label class="required" for="coupon-code" style="font-weight: bold;">
-                            <span class="required-f">*</span> Coupon Code
-                        </label>
-                        <form action="" method="POST">
-                            {% csrf_token %}
-                            <input id="coupon-code" required type="text" name="promo_code" class="form-control mb-3" placeholder="Enter your coupon code" style="border: 1px solid #ced4da; border-radius: 5px;">
-                            <button class="btn btn-success w-100" type="submit" style="background-color: #28a745; color: white; font-weight: bold;">Apply Coupon</button>
-                        </form>
+            <div class="col-lg-4">
+                <form class="mb-5" action="">
+                    <div class="input-group">
+                        <input type="text" class="form-control p-4" placeholder="Coupon Code">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary">Apply Coupon</button>
+                        </div>
+                    </div>
+                </form>
+                <div class="card border-secondary mb-5">
+                    <div class="card-header bg-secondary border-0">
+                        <h4 class="font-weight-semi-bold m-0">Cart Summary</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3 pt-1">
+                            <h6 class="font-weight-medium">Subtotal</h6>
+                            <h6 class="font-weight-medium">${{ total }}</h6>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <h6 class="font-weight-medium">Tax</h6>
+                            <h6 class="font-weight-medium">${{ tax }}</h6>
+                        </div>
+                    </div>
+                    <div class="card-footer border-secondary bg-transparent">
+                        <div class="d-flex justify-content-between mt-2">
+                            <h5 class="font-weight-bold">Grand Total</h5>
+                            <h5 class="font-weight-bold">${{ grand_total|floatformat:2 }}</h5>
+                        </div>
+                        <button class="btn btn-block btn-primary my-3 py-3">Proceed To Checkout</button>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- End Coupon section -->
-
-        <div class="row mt-3">
-            <div class="col-12 col-sm-6 cart__subtotal-title"><strong>TAX</strong></div>
-            <div class="col-12 col-sm-6 cart__subtotal-title cart__subtotal text-right">
-                <span class="money">{{ tax }}</span>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-12 col-sm-6 cart__subtotal-title"><strong>Grand Total</strong></div>
-            <div class="col-12 col-sm-6 cart__subtotal-title cart__subtotal text-right">
-                <span class="money">${{ grand_total|floatformat:2 }}</span>
-            </div>
-        </div>
-        <div class="cart__shipping">Shipping &amp; taxes calculated at checkout</div>
-        
-        <p class="cart_tearm mt-3">
-            <label>
-                <input type="checkbox" name="tearm" id="cartTearm" class="checkbox" value="tearm" required>
-                I agree with the terms and conditions
-            </label>
-        </p>
-
-        <div class="text-align-center mt-3"> <!-- Center the button -->
-            <a href="{% url 'checkout' %}" class="btn btn-outline-primary d-flex btn-block" style="border-color: #8fbae8; color: #8fbae8;">Checkout</a>
-        </div>
-
-        <div class="payment-img mt-3">
-            <img src="{% static 'assets/images/payment-img.jpg' %}" alt="Payment" class="img-fluid">
-        </div>
     </div>
-</div>
-        </div>
-    </div>
-    
+    <!-- Cart End -->
 </div>
 <!--End Body Content-->
 {% endblock %}

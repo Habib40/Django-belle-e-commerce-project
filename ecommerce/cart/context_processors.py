@@ -36,14 +36,14 @@ def cart_context(request, cart_item_id=None):
     # Calculate total and items count
     items_count = len(cart_items)  # Count of cart items
 
-    # Calculate total dynamically
-    total = sum(item['total'] for item in cart_items if isinstance(item, dict))  # For session items
+   # Calculate total dynamically
+    total = sum(item['total'] for item in cart_items if isinstance(item, dict))
     total += sum(item.quantity * item.product.discount_amount for item in cart_items if isinstance(item, CartItem))  # For CartItem instances
-
+    print(f"Total calculated: {total}")
     # Tax and grand total calculations
     tax = (2 * total) / 100  # Example tax calculation
-    grand_total = total + tax  # Grand total including tax
-
+    grand_total = total + tax
+    
     return {
         'cart_items': cart_items,
         'total': total,
@@ -51,5 +51,4 @@ def cart_context(request, cart_item_id=None):
         'tax': tax,
         'items_count': items_count,
     }
-    
 

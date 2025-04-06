@@ -22,7 +22,8 @@ urlpatterns = [
     path('accounts/', include('account.urls')),
     path('', include('Api_APP.urls')),
     # orders paths
-    path('orders/',include('order.urls'))
+    path('orders/',include('order.urls')),
+    path('blogs/',include('blog.urls'))
     
 ]#+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 
 
