@@ -287,16 +287,47 @@ def payment_cancel(request):
     return HttpResponse
 
 
+# def generate_invoice(request, order_id):
+#     # Get the order using the order_id
+#     order = get_object_or_404(Order, id=order_id, user=request.user)  # Ensure user ownership
+#     order_products = OrderProduct.objects.filter(order=order).select_related('product')
+
+#     # Create a context for the template
+#     context = {
+#         'order': order,
+#         'order_products': order_products,
+#         'request': request,  # Include the request object for absolute URLs
+#     }
+
+#     # Render the template to a string for PDF generation
+#     html = render_to_string('orders/invoice.html', context)
+
+#     # Create a PDF response
+#     response = HttpResponse(content_type='application/pdf')
+#     response['Content-Disposition'] = f'attachment; filename="invoice_{order.id}.pdf"'
+
+#     # Generate PDF
+#     pisa_status = pisa.CreatePDF(html, dest=response)
+
+#     if pisa_status.err:
+#         return HttpResponse('We had some errors <pre>' + html + '</pre>')
+
+#     return response
+
 def generate_invoice(request, order_id):
     # Get the order using the order_id
     order = get_object_or_404(Order, id=order_id, user=request.user)  # Ensure user ownership
     order_products = OrderProduct.objects.filter(order=order).select_related('product')
 
+    # Create a list of products with absolute image URLs
+    for order_product in order_products:
+        order_product.product.image_url = request.build_absolute_uri(order_product.product.images.url)
+
     # Create a context for the template
     context = {
         'order': order,
         'order_products': order_products,
-        'request': request,  # Include the request object for absolute URLs
+        'request': request,
     }
 
     # Render the template to a string for PDF generation
@@ -307,10 +338,9 @@ def generate_invoice(request, order_id):
     response['Content-Disposition'] = f'attachment; filename="invoice_{order.id}.pdf"'
 
     # Generate PDF
-    pisa_status = pisa.CreatePDF(html, dest=response)
+    pisa_status = pisa.CreatePDF(html, dest=response, context={'base_url': request.build_absolute_uri('/')})
 
     if pisa_status.err:
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
 
     return response
-
