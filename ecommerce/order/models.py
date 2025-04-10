@@ -18,14 +18,11 @@ class Payment(models.Model):
     
     
 STATUS_CHOICES = [
-        ('New', 'New'),
+        ('Pending', 'Pending'),
         ('Accepted', 'Accepted'),
         ('Completed', 'Completed'),
         ('Cancelled', 'Cancelled'),
     ]
-
-
-
 class Order(models.Model):
     user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True)
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, null=True, blank=True)
@@ -42,7 +39,7 @@ class Order(models.Model):
     order_note = models.CharField(max_length=150, blank=True)
     order_total = models.FloatField()
     tax = models.FloatField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='New')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     ip = models.CharField(max_length=100, blank=True)
     is_ordered = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

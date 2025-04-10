@@ -11,6 +11,7 @@
 <meta name="description" content="description">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+
 <!-- Favicon -->
 <link rel="shortcut icon" href="{% static 'assets/images/favicon.png' %}" />
 <!-- Plugins CSS -->
@@ -186,14 +187,14 @@
                                                 <a href="{% url 'remove_cart' product_id=item.product.id color=item.color size=item.size %}" class="remove">
                                                     <i class="anm anm-times-l" aria-hidden="true"></i>
                                                 </a>
-                                                <a class="pName" href="#">{{ item.product.title }}</a>
+                                                <a class="pName" href="#">{{ item.product.title|truncatechars:40 }}</a>
                                                 <div class="wrapQtyBtn d-flex align-items-center mt-2">
                                                     <span class="label me-2">Qty:</span>
                                                     <input type="text" id="Quantity" name="quantity" value="{{ item.quantity }}" class="form-control form-control-sm qty" readonly>
                                                 </div>
                                                 <div class="priceRow mt-2">
                                                     <div class="product-price">
-                                                        <span class="money">$ {{ total }} For each</span>
+                                                        <!-- <span class="money">$ {{ total }} For each</span> -->
                                                     </div>
                                                 </div>
                                             </div>

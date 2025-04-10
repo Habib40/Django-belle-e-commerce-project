@@ -114,7 +114,7 @@
         </table>
 <br><br>
         <h2>Tax: ${{ order.tax }}</h2>
-        <h2 class="total">Total Amount: ${{ order.order_total }}</h2>
+        <h2 class="total">Total Amount: ${{ order.order_total|floatformat:0  }}</h2>
 
         <div class="contact-info">
             <p>If you have any questions, feel free to contact us:</p>

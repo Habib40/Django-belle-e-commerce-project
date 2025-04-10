@@ -99,11 +99,12 @@
                 </table>
             </div>
             <div class="col-lg-4">
-                <form class="mb-5" action="">
+                <form class="mb-5" action="" method="POST">
+                   {% csrf_token %}
                     <div class="input-group">
-                        <input type="text" class="form-control p-4" placeholder="Coupon Code">
+                        <input type="text"  name="promo_code" class="form-control p-4" placeholder="Coupon Code">
                         <div class="input-group-append">
-                            <button class="btn btn-primary">Apply Coupon</button>
+                            <button type="submit" class="btn btn-primary">Apply Coupon</button>
                         </div>
                     </div>
                 </form>
@@ -126,7 +127,10 @@
                             <h5 class="font-weight-bold">Grand Total</h5>
                             <h5 class="font-weight-bold">${{ grand_total|floatformat:2 }}</h5>
                         </div>
-                        <button class="btn btn-block btn-primary my-3 py-3">Proceed To Checkout</button>
+                        <!-- <button type="button" class="btn btn-block btn-primary my-3 py-3" onclick="window.location.href='{% url 'checkout' %}'">
+                            Proceed To Checkout
+                        </button> -->
+                        <a href="{% url 'checkout' %}" class="btn btn-block btn-primary my-3 py-3">Proceed To Checkout</a>
                     </div>
                 </div>
             </div>

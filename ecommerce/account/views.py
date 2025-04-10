@@ -170,30 +170,24 @@ def Dashboard(request):
     try:
         # Fetch Order instances for the logged-in user, ordered by creation date
         orders = Order.objects.filter(user=request.user).order_by('-created_at')
-
         # Initialize a list to hold the Order and OrderProduct instances
         order_details = []
-
         for order in orders:
             # Get related OrderProduct records
             order_products = OrderProduct.objects.filter(order=order).select_related('product')
-
             # Append the order and its products directly to the list
             order_details.append({
                 'order': order,
                 'order_products': order_products
             })
-
+        
         # Render the dashboard template with the order details
         return render(request, 'accounts/dashboard.html', {
             'order_details': order_details,
             'messages': request.session.pop('messages', [])  # Optional: to pass messages if any
         })
-
     except Exception as e:
-        # Handle exceptions (e.g., log the error)
         return render(request, 'error.html', {'error': str(e)})
-    
     
     
     

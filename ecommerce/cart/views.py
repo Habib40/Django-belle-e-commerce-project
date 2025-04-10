@@ -2,7 +2,7 @@ from django.shortcuts import render,render,redirect ,HttpResponse,get_object_or_
 from shop.models import Product,ProductColor,WishList
 from promotions.models import AppliedPromotion
 from.models import Cart,CartItem
-from promotions.models import Promotion
+from promotions.models import Coupon
 from django.http import Http404
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
@@ -304,7 +304,6 @@ def Remove_cart(request, product_id, color, size):
 def calculate_totals(cart_items):
     total = Decimal(0)
     quantity = 0
-
     for cart_item in cart_items:
         if isinstance(cart_item, dict):
             item_total = cart_item['sub_total']
@@ -312,48 +311,14 @@ def calculate_totals(cart_items):
         else:
             item_total = cart_item.product.discount_amount * cart_item.quantity
             quantity += cart_item.quantity
-        
         total += item_total
-
     return total, quantity
-
-def handle_promo_code(request, current_user, total):
-    discount = Decimal(0)
-    promo_code = request.POST.get('promo_code')
-
-    if promo_code:
-        try:
-            promotion = Promotion.objects.get(code=promo_code)
-            discount = (promotion.discount_percentage / Decimal(100)) * total
-            discount = min(discount, total)  # Prevent discount > total
-
-            messages.success(request, "Promo code applied successfully.")
-
-            if current_user.is_authenticated:
-                AppliedPromotion.objects.update_or_create(
-                    user=current_user,
-                    promo_code=promo_code,
-                    defaults={'discount': discount}
-                )
-                # Store in session for authenticated users as well
-                request.session['discount'] = float(discount)
-                request.session['promo_code'] = promo_code
-            else:
-                request.session['discount'] = float(discount)
-                request.session['promo_code'] = promo_code
-
-        except Promotion.DoesNotExist:
-            messages.error(request, "Invalid promo code. Please try again.")
-
-    return discount
-
 def CartPage(request, total=0, quantity=0, cart_items=None):
     print("CartPage is Called")
     current_user = request.user
     tax = Decimal(0)
     grand_total = Decimal(0)
     discount = Decimal(0)
-
     # Retrieve the user's cart
     if current_user.is_authenticated:
         cart = Cart.objects.filter(user=current_user).first()
@@ -380,35 +345,17 @@ def CartPage(request, total=0, quantity=0, cart_items=None):
 
     # Example tax calculation (2% of total)
     tax = (Decimal(2) * total) / Decimal(100)
-    grand_total = total + tax
+    total_after_discount = total - discount
+    tax = (Decimal(2) * total_after_discount) / Decimal(100)  # Calculate tax after discount
+    grand_total = total_after_discount + tax  # Calculate grand total
 
-    # Handle promo code application
-    if request.method == 'POST':
-        discount = handle_promo_code(request, current_user, total)
-        grand_total = total + tax - discount
-    else:
-        # Check if there's a discount in the session for unauthenticated users
-        if not current_user.is_authenticated and 'discount' in request.session:
-            discount = Decimal(request.session['discount'])
-            grand_total = total + tax - discount
-        # For authenticated users, check for applied promotions
-        elif current_user.is_authenticated:
-            applied_promos = AppliedPromotion.objects.filter(user=current_user)
-            if applied_promos.exists():
-                last_promo = applied_promos.last()
-                discount = last_promo.discount
-                grand_total = total + tax - discount
-
-    # Clear session discount if the cart is empty
-    if not cart_items:
-        request.session.pop('discount', None)
-        request.session.pop('promo_code', None)
+    grand_total = round(grand_total, 2)  # Ensure consistent rounding
 
     # Prepare context for rendering
     context = {
         'cart_items': cart_items,
         'total': total,
-        'grand_total': grand_total,
+        'grand_total': round(grand_total),
         'tax': tax,
         'cart_empty': not cart_items,
         'discount': round(float(discount), 4),
@@ -437,20 +384,15 @@ def Checkout(request):
 
     # Retrieve discount from session
     discount = Decimal(request.session.get('discount', 0))  # Default to 0 if not set
-
     # Calculate Total After Discount
     total_after_discount = total - discount
-
     # Calculate tax
-    tax = total_after_discount * tax_rate
-
+    tax = (Decimal(2) * total_after_discount) / Decimal(100)  # 2% tax
     # Grand Total Calculation
     grand_total = total_after_discount + tax
-
     # Ensure grand total does not go negative
     if grand_total < 0:
         grand_total = Decimal(0)
-
     # Create an Order instance and save it
     if request.method == 'POST':
         order = Order.objects.create(
@@ -460,7 +402,6 @@ def Checkout(request):
             tax=tax,
             discount=discount
         )
-
         # Add items to the order
         for cart_item in cart_items:
             OrderProduct.objects.create(
@@ -469,26 +410,20 @@ def Checkout(request):
                 quantity=cart_item.quantity,
                 price=cart_item.product.discount_amount
             )
-
         # Clear the cart or mark items as purchased
         cart_items.delete()  # Adjust as necessary for your application logic
-
         # Clear the session discount after order creation
-        request.session.pop('discount', None)
-        request.session.pop('promo_code', None)
-
         # Redirect to the order success page
         return redirect('order_success')
-
-    # Prepare the context
     context = {
         'cart_items': cart_items,
         'total': total,
         'quantity': quantity,
         'tax': tax,
-        'grand_total': grand_total,
+        'grand_total': round(grand_total),
         'discount': round(float(discount), 4),  # Optional: Include discount in context
     }
+    # grand_total = round(grand_total, 2)  # Round to two decimal places
 
     return render(request, 'accounts/checkout.html', context)
 

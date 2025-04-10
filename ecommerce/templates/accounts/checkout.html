@@ -4,7 +4,7 @@
 {% block content %}
 <section class="section-content padding-y bg">
     <div class="container">
-        <div class="row">  
+        <div class="row">
             <aside class="col-lg-6">
                 <div class="card">
                     <div class="card-body">
@@ -45,7 +45,6 @@
                                     </ul>
                                 </div>
                             {% endif %}
-                            
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label for="first_name">First Name:</label>
@@ -88,86 +87,65 @@
                                     <textarea name="order_note" id="order_note" class="form-control" placeholder="Add any special instructions or notes" rows="3"></textarea>
                                 </div>
                             </div>
-                            <div class="d-flex justify-content-between mt-3">
-                                
-                                <button type="submit" class="btn btn-outline-primary">Place Order</button>
+                            <div class="d-flex justify-content-between mt-3"><button type="submit" class="btn btn-outline-primary">Place Order</button>
                             </div>
                         </form>
                     </div>
                 </div>
             </aside>
 
-            <aside class="col-lg-6">
-                <div class="card shadow-sm">
-
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">Shopping Cart</h5>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-borderless table-shopping-cart">
-                            <thead class="text-muted">
-                                <tr class="small text-uppercase">
-                                    <th scope="col">Product</th>
-                                    <th scope="col" width="120">Quantity</th>
-                                    <th scope="col" width="120">Price</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% if cart_items %}
-                                    {% for cart_item in cart_items %}
-                                    <tr>
-                                        <td>
-                                            <figure class="itemside align-items-center">
-                                                <div class="aside">
-                                                    <img src="{{ cart_item.product.images.url|default:'path/to/placeholder/image.png' }}" class="img-sm rounded" style="height: 100px;" alt="{{ cart_item.product.title }}">
-                                                </div>
-                                                <figcaption class="info">
-                                                    <a href="{{ cart_item.product.get_url }}" class="title text-dark">
-                                                        <h6 class="mb-1">{{ cart_item.product.title }}</h6>
-                                                    </a>
-                                                </figcaption>
-                                            </figure>
-                                        </td>
-                                        <td>
-                                            <div class="col">
-                                                <span class="badge badge-light">{{ cart_item.quantity }}</span>
-                                                <form action="{% url 'remove_cart_item' cart_item.id %}" method="POST" style="display:inline;">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="price-wrap">
-                                                <var class="price">${{ sub_total|floatformat:2 }}</var>
-                                                <small class="text-muted">
-                                                    ${{ cart_item.product.discount_amount|floatformat:2 }} 
-                                                </small>
-                                                <p class="text text-info mb-0">Unit Price</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                {% else %}
-                                    <tr>
-                                        <td colspan="3" class="text-center text-danger">Your cart is empty.</td>
-                                    </tr>
-                                {% endif %}
-                                
+            <aside style="flex: 1; padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; margin-left: 15px;">
+                <h4 style="margin-bottom: 15px;">Cart Items</h4>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left; padding: 10px; border-bottom: 1px solid #dee2e6;">Item Name</th>
+                            <th style="text-align: right; padding: 10px; border-bottom: 1px solid #dee2e6;">Item Price</th>
+                            <th style="text-align: center; padding: 10px; border-bottom: 1px solid #dee2e6;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if cart_items %}
+                            {% for cart_item in cart_items %}
                                 <tr>
-                                    <td colspan="2">
-                                        <hr>
-                                        <p>Grand Total With Tax: <b>${{ grand_total|floatformat:2 }}</b></p>
+                                    <td style="padding: 10px; border-bottom: 1px solid #dee2e6;">
+                                        <div style="display: flex; align-items: center;">
+                                            <img width="50" height="50" src="{{ cart_item.product.images.url|default:'path/to/placeholder/image.png' }}" alt="" style="margin-right: 10px;">
+                                            <a href="{{ cart_item.product.get_url }}">
+                                            <span>{{ cart_item.product.title|truncatechars:40 }}</span>
+                                            </a>
+                                        </div>
+                                    </td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #dee2e6; text-align: right;">
+                                        {{ cart_item.product.discount_amount|floatformat:2 }} <!-- Dynamically insert price -->
+                                    </td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #dee2e6; text-align: center;">
+                                        <a class="edd_cart_remove_item_btn" href="{% url 'remove_cart' product_id=cart_item.product.id color=cart_item.color size=cart_item.size %}" style="color: #007bff; text-decoration: none;">Remove</a>
                                     </td>
                                 </tr>
-                            </tbody>
-                        </table>
-                        <p class="text-center">
-                            <a href="{% url 'store' %}" class="btn btn-primary btn-block">Continue Shopping</a>
-                        </p>
-                    </div>
-                </div>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center text-danger">Your cart is empty.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2" style="text-align: right; padding: 10px; border-top: 2px solid #dee2e6;">
+                                <strong>Total:</strong>
+                            </td>
+                            <td style="padding: 10px; border-top: 2px solid #dee2e6; text-align: center;">
+                                <strong>{{ grand_total|floatformat:2 }}</strong> <!-- Dynamically insert total price -->
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <!-- <div style="text-align: right; margin-top: 10px;">
+                    <a class="edd-cart-saving-button edd-submit button" id="edd-save-cart-button" href="#" style="padding: 8px 12px; background-color: #007bff; color: white; border-radius: 4px; text-decoration: none;">Save Cart</a>
+                </div> -->
             </aside>
+        </div>
     </div>
 </section>
 {% endblock %}

@@ -66,15 +66,24 @@
                                 <div class="col-md-4">
                                     <h6 class="text-muted">Payment</h6>
                                     <span class="text-success">
-                                        {% if detail.order.payment_type == 'visa' %}
-                                            <i class="fab fa-lg fa-cc-visa"></i>
-                                        {% elif detail.order.payment_type == 'mastercard' %}
-                                            <i class="fab fa-lg fa-cc-mastercard"></i>
-                                        {% elif detail.order.payment_type == 'paypal' %}
-                                            <i class="fab fa-lg fa-cc-paypal"></i>
+                                        {% if detail.order.cash_on_delivery %}
+                                            <strong>Cash on Delivery</strong>
+                                        {% else %}
+                                            {% if detail.order.payment_method == 'visa' %}
+                                                <i class="fab fa-lg fa-cc-visa"></i>
+                                                {{ detail.order.payment_method|title }} **** {{ detail.order.card_last_digits }}
+                                            {% elif detail.order.payment_method == 'mastercard' %}
+                                                <i class="fab fa-lg fa-cc-mastercard"></i>
+                                                {{ detail.order.payment_method|title }} **** {{ detail.order.card_last_digits }}
+                                            {% elif detail.order.payment_method == 'paypal' %}
+                                                <i class="fab fa-lg fa-cc-paypal"></i>
+                                                {{ detail.order.payment_method|title }} **** {{ detail.order.card_last_digits }}
+                                            {% else %}
+                                                <strong>Other Payment Method</strong> ({{ detail.order.payment_method }})
+                                            {% endif %}
                                         {% endif %}
-                                        {{ detail.order.payment_type|title }} **** {{ detail.order.card_last_digits }}
                                     </span>
+                                    
                                     <p>
                                         Subtotal: <span class="text-primary">${{ detail.order.order_total|floatformat:2 }}</span> <br>
                                         Shipping Fee: <span class="text-secondary">${{ detail.order.shipping_fee|floatformat:2 }}</span> <br> 

@@ -44,7 +44,7 @@
                                         <td>
                                             <figure class="itemside align-items-center">
                                                 <a href="{{ order_product.product.get_url }}" class="title text-dark">
-                                                    <h5 class="mb-0">{{ order_product.product.title }}</h5>
+                                                    <h5 class="mb-0">{{ order_product.product.title|truncatechars:40 }}</h5>
                                                 </a>
                                                 <div class="aside">
                                                     <img src="{{ order_product.product.images.url }}" class="img-sm" style="height:100px;width:150;" alt="{{ order_product.product.title }}">
@@ -83,7 +83,7 @@
                             <div class="row">
                                 <span class="col-12 col-sm-6 cart__subtotal-title"><strong>TAX</strong></span>
                                 <span class="col-12 col-sm-6 cart__subtotal-title cart__subtotal text-right">
-                                    <span class="money">${{ tax }}</span>
+                                    <span class="money">${{ tax|floatformat:1 }}</span>
                                 </span>
                             </div>
                             <div class="row">
