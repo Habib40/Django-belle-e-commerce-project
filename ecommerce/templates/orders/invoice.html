@@ -104,7 +104,7 @@
                 <tr>
                     <td>
                         <!-- <img src="{{ request.scheme }}://{{ request.get_host }}{{ order_product.product.images.url }}" width="40" alt="Product Image"> Reduced image size -->
-                        <img src="{{ order_product.product.image_url }}" width="40" alt="Product Image">
+                        <img src="{{ request.scheme }}://{{ request.get_host }}{{ order_product.product.images.url}}" width="40" alt="Product Image">
                     </td>
                     <td>{{ order_product.product.title }}</td>
                     <td>${{ order_product.product.discount_amount }}</td>
