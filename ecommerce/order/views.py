@@ -344,3 +344,4 @@ def generate_invoice(request, order_id):
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
 
     return response
+

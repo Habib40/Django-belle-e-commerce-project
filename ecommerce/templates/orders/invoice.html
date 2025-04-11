@@ -104,7 +104,7 @@
                 <tr>
                     <td>
                         <!-- <img src="{{ request.scheme }}://{{ request.get_host }}{{ order_product.product.images.url }}" width="40" alt="Product Image"> Reduced image size -->
-                        <img src="{{ request.scheme }}://{{ request.get_host }}{{ order_product.product.images.url}}" width="40" alt="Product Image">
+                        <img src="{{ order_product.product.image_url }}" width="40" alt="Product Image">
                     </td>
                     <td>{{ order_product.product.title }}</td>
                     <td>${{ order_product.product.discount_amount }}</td>
@@ -119,11 +119,11 @@
 
         <div class="contact-info">
             <p>If you have any questions, feel free to contact us:</p>
-            <p>Email: <a href="mailto:support@yourcompany.com">support@belle.com</a> | Phone: (123) 456-7890</p>
+            <p>Email: <a href="mailto:support@yourcompany.com">support@belle.com</a> | Phone: (+88) 01744194831</p>
         </div>
     </div>
     <footer>
-        © {{ current_year }} Belle. All rights reserved.
+        © 2025 Belle. All rights reserved.
     </footer>
 </body>
 </html>
