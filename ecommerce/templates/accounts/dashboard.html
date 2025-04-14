@@ -85,9 +85,9 @@
                                     </span>
                                     
                                     <p>
-                                        Subtotal: <span class="text-primary">${{ detail.order.order_total|floatformat:2 }}</span> <br>
-                                        Shipping Fee: <span class="text-secondary">${{ detail.order.shipping_fee|floatformat:2 }}</span> <br> 
-                                        <span class="font-weight-bold text-danger">Total: ${{ detail.order.order_total|floatformat:2 }}</span>
+                                        Subtotal: <span class="text-primary">${{ detail.order.order_total|floatformat:0 }}</span> <br>
+                                        Shipping Fee: <span class="text-secondary">${{ detail.order.shipping_fee|floatformat:0 }}</span> <br> 
+                                        <span class="font-weight-bold text-danger">Total: ${{ detail.order.order_total|floatformat:0 }}</span>
                                         <h5>
                                             <span class="font-weight-bold text-warning">Status: {{ detail.order.status }}</span>
                                             <a href="{% url 'generate_invoice' detail.order.id %}" class="btn btn-success bg-light text-info">Invoice</a>

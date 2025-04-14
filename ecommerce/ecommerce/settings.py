@@ -1,5 +1,4 @@
-# Import dj-database-url at the beginning of the file.
-
+# Import dj-database-url at the beginning of the file
 import dj_database_url
 from pathlib import Path
 import os
@@ -9,7 +8,6 @@ from django.core.wsgi import get_wsgi_application
 
 # Load environment variables from .env file
 load_dotenv()
-
 # Access environment variables
 STEADFAST_API_KEY = os.getenv("STEADFAST_API_KEY")
 STEADFAST_SECRET_KEY = os.getenv("STEADFAST_SECRET_KEY")
@@ -18,15 +16,11 @@ APIK_KEY = f"This is APIKEY  {STEADFAST_API_KEY} from SteadFast"
 
 # STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
 # STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
-
-
 IT_PAY_BD_API_KEY = os.getenv("IT_PAY_BD_API_KEY")
 # print(f"This is STRIPE_PUBLISHABLE_KEY " ,STRIPE_PUBLISHABLE_KEY)
 # print(f"This is STRIPE_SECRET_KEY ",STRIPE_SECRET_KEY)
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 TEMPLATES_DIRS = BASE_DIR/'templates'
 TEMPLATE = TEMPLATES_DIRS
 

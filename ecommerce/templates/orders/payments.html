@@ -83,13 +83,14 @@
                             <div class="row">
                                 <span class="col-12 col-sm-6 cart__subtotal-title"><strong>TAX</strong></span>
                                 <span class="col-12 col-sm-6 cart__subtotal-title cart__subtotal text-right">
-                                    <span class="money">${{ tax|floatformat:1 }}</span>
+                                    <span class="money">${{ tax|floatformat:0 }}</span>
                                 </span>
                             </div>
                             <div class="row">
                                 <span class="col-12 col-sm-6 cart__subtotal-title"><strong>Grand Total</strong></span>
                                 <span class="col-12 col-sm-6 cart__subtotal-title cart__subtotal text-right">
-                                    <span class="money">${{ grand_total }}</span>
+                                    <span class="money">${{ grand_total|floatformat:0  }}</span>
+                                    
                                 </span>
                             </div>
                             <div class="cart__shipping">Shipping &amp; taxes calculated at checkout</div>

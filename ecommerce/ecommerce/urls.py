@@ -23,6 +23,7 @@ urlpatterns = [
     path('', include('Api_APP.urls')),
     # orders paths
     path('orders/',include('order.urls')),
+    path('coupon/',include('promotions.urls')),
     path('blogs/',include('blog.urls'))
     
 ]#+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 

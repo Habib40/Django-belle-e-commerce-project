@@ -117,7 +117,7 @@
                                         </div>
                                     </td>
                                     <td style="padding: 10px; border-bottom: 1px solid #dee2e6; text-align: right;">
-                                        {{ cart_item.product.discount_amount|floatformat:2 }} <!-- Dynamically insert price -->
+                                        {{ cart_item.product.discount_amount|floatformat:0 }} <!-- Dynamically insert price -->
                                     </td>
                                     <td style="padding: 10px; border-bottom: 1px solid #dee2e6; text-align: center;">
                                         <a class="edd_cart_remove_item_btn" href="{% url 'remove_cart' product_id=cart_item.product.id color=cart_item.color size=cart_item.size %}" style="color: #007bff; text-decoration: none;">Remove</a>
@@ -136,7 +136,7 @@
                                 <strong>Total:</strong>
                             </td>
                             <td style="padding: 10px; border-top: 2px solid #dee2e6; text-align: center;">
-                                <strong>{{ grand_total|floatformat:2 }}</strong> <!-- Dynamically insert total price -->
+                                <strong>{{ grand_total|floatformat:0 }}</strong> <!-- Dynamically insert total price -->
                             </td>
                         </tr>
                     </tfoot>

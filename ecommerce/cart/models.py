@@ -3,6 +3,7 @@ from account.models import Account
 from shop.models import Product,ProductColor
 import uuid
 from django.conf import settings
+from promotions.models import Coupon
 
 
 
@@ -10,7 +11,10 @@ class Cart(models.Model):
     user = models.ForeignKey(Account,on_delete=models.CASCADE,null=True)
     cart_id = models.CharField(max_length=250,blank=True,default=str(uuid.uuid4()))
     date_added = models.DateTimeField(auto_now_add=True)
-    
+  
+
+    def __str__(self):
+        return self.cart_id
     def __str__(self):
         return self.cart_id
 
@@ -27,14 +31,14 @@ class CartItem(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+   
+    
     class Meta:
         unique_together = ('product', 'color', 'size', 'cart')  # Prevent duplicates based on color and size
-    
-    
+        
     def sub_total(self):
         return self.product.discount_amount * self.quantity
     
     def __str__(self):
         return f"Cart item for {self.product.title}"
-    
     

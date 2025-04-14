@@ -51,9 +51,6 @@ def Add_to_Cart(request, product_id):
             #  # Remove the item from the wishlist if it exists
              
             WishList.objects.filter(user=current_user, wish_product=product).delete()
-
-            
-
         else:
             # Handle unauthenticated users
             if 'cart_items' not in request.session:
@@ -81,129 +78,6 @@ def Add_to_Cart(request, product_id):
         return redirect('carts')
     else:
         return redirect('carts')
-from django.shortcuts import get_object_or_404, redirect
-from django.http import JsonResponse
-from django.contrib import messages
-from .models import Cart, CartItem
-
-# def minus_cart(request, product_id):
-#     print("minus_cart function called with product_id:", product_id)
-#     if request.method == 'POST':
-#         current_user = request.user
-
-#         if current_user.is_authenticated:
-#             print("Authenticated user detected.")
-#             try:
-#                 cart = Cart.objects.get(user=current_user)
-#                 cart_item = get_object_or_404(CartItem, product__id=product_id, cart=cart)
-#                 print(f"Current item quantity: {cart_item.quantity}")
-
-#                 if cart_item.quantity > 1:
-#                     cart_item.quantity -= 1  # Decrease the quantity
-#                     cart_item.save()  # Save changes
-#                     print(f"Updated item quantity: {cart_item.quantity}")
-#                     messages.success(request, "Item quantity decreased.")
-#                     new_quantity = cart_item.quantity
-#                 else:
-#                     print("Quantity is 0, item will be deleted.")
-#                     cart_item.delete()  # Remove item if quantity is 0
-#                     messages.success(request, "Item removed from cart.")
-#                     new_quantity = 0  # Set quantity to 0 after deletion
-                
-#                 # return JsonResponse({'status': 'success', 'new_quantity': new_quantity})
-#                 return redirect('carts')
-
-#             except Cart.DoesNotExist:
-#                 messages.error(request, "Cart not found.")
-#                 print("Cart does not exist.")
-#                 return JsonResponse({'status': 'error', 'message': "Cart not found."}, status=404)
-#             except Exception as e:
-#                 print(f"Error occurred: {e}")
-#                 messages.error(request, "An error occurred while updating the cart.")
-#                 return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-
-#         else:
-#             print("Unauthenticated user detected.")
-#             session_cart_items = request.session.get('cart_items', [])
-#             item_found = False
-
-#             for item in session_cart_items:
-#                 if item['product_id'] == product_id:
-#                     print(f"Found item in session cart: {item}")
-#                     if item['quantity'] > 1:
-#                         item['quantity'] -= 1  # Decrease the quantity
-#                         messages.success(request, "Item quantity decreased.")
-#                         new_quantity = item['quantity']
-#                     else:
-#                         print("Quantity is 0, item will be removed from session cart.")
-#                         session_cart_items.remove(item)  # Remove item if quantity is 0
-#                         messages.success(request, "Item removed from cart.")
-#                         new_quantity = 0  # Set quantity to 0 after deletion
-#                     item_found = True
-#                     break
-
-#             if not item_found:
-#                 messages.error(request, "Item not found in session cart.")
-#                 return JsonResponse({'status': 'error', 'message': "Item not found in session cart."}, status=404)
-
-#             # Update session cart items
-#             request.session['cart_items'] = session_cart_items
-#             request.session.modified = True  # Mark session as modified
-#             print(f"Updated session cart items: {session_cart_items}")
-#             # return JsonResponse({'status': 'success', 'new_quantity': new_quantity})
-#             return redirect('carts')
-
-#     print("Minus Cart is called")
-#     return redirect('checkout')
-
-# def minus_cart(request, product_id):
-#     if request.method == 'POST':
-#         current_user = request.user
-
-#         if current_user.is_authenticated:
-#             print("Authenticated user detected.")
-#             try:
-#                 cart = Cart.objects.get(user=current_user)
-#                 cart_item = get_object_or_404(CartItem, product__id=product_id, cart=cart)
-#                 print(f"Current item quantity: {cart_item.quantity}")
-
-#                 if cart_item.quantity > 1:
-#                     cart_item.quantity -= 1  # Decrease the quantity
-#                     cart_item.save()  # Save changes
-#                     messages.success(request, "Item quantity decreased.")
-#                 else:
-#                     cart_item.delete()  # Remove item if quantity is 0
-#                     messages.success(request, "Item removed from cart.")
-                
-#                 return JsonResponse({'status': 'success', 'new_quantity': cart_item.quantity})
-
-#             except Cart.DoesNotExist:
-#                 messages.error(request, "Cart not found.")
-#                 print("Cart does not exist.")
-#                 return JsonResponse({'status': 'error', 'message': "Cart not found."}, status=404)
-#         else:
-#             print("Unauthenticated user detected.")
-#             if 'cart_items' in request.session:
-#                 session_cart_items = request.session['cart_items']
-#                 for item in session_cart_items:
-#                     if item['product_id'] == product_id:
-#                         print(f"Found item in session cart: {item}")
-#                         if item['quantity'] > 1:
-#                             item['quantity'] -= 1  # Decrease the quantity
-#                             messages.success(request, "Item quantity decreased.")
-#                         else:
-#                             session_cart_items.remove(item)  # Remove item if quantity is 0
-#                             messages.success(request, "Item removed from cart.")
-#                         break
-#                 else:
-#                     messages.error(request, "Item not found in session cart.")
-
-#                 request.session['cart_items'] = session_cart_items  # Update the session
-#             else:
-#                 messages.error(request, "You need to be logged in to modify the cart.")
-#     print("Minus Cart is called")
-#     return redirect('carts')
-
 
 def minus_cart(request, product_id, color, size):
     if request.method == 'POST':
@@ -313,56 +187,62 @@ def calculate_totals(cart_items):
             quantity += cart_item.quantity
         total += item_total
     return total, quantity
+
 def CartPage(request, total=0, quantity=0, cart_items=None):
-    print("CartPage is Called")
     current_user = request.user
     tax = Decimal(0)
     grand_total = Decimal(0)
     discount = Decimal(0)
+
     # Retrieve the user's cart
     if current_user.is_authenticated:
         cart = Cart.objects.filter(user=current_user).first()
-        cart_items = CartItem.objects.filter(cart=cart, is_active=True).order_by('-created_at') if cart else []
     else:
         cart_id = _cart_id(request)
         cart = Cart.objects.filter(cart_id=cart_id).first()
-        cart_items = CartItem.objects.filter(cart=cart, is_active=True).order_by('-created_at') if cart else []
 
-        # Check for items in session
-        if 'cart_items' in request.session:
-            session_cart_items = request.session['cart_items']
-            for item in session_cart_items:
-                product = get_object_or_404(Product, id=item['product_id'])
-                cart_items.append({
-                    'product': product,
-                    'quantity': item['quantity'],
-                    'color': item['color'],
-                    'size': item['size'],
-                    'sub_total': product.discount_amount * item['quantity'],
-                })
+    # Initialize the cart_items list
+    cart_items = []
 
+    # Check if the cart exists and retrieve its items
+    if cart:
+        cart_items = CartItem.objects.filter(cart=cart, is_active=True).order_by('-created_at')
+
+    # Check for items in session (if applicable)
+    if 'cart_items' in request.session:
+        session_cart_items = request.session['cart_items']
+        for item in session_cart_items:
+            product = get_object_or_404(Product, id=item['product_id'])
+            cart_items.append({
+                'product': product,
+                'quantity': item['quantity'],
+                'color': item['color'],
+                'size': item['size'],
+                'sub_total': product.discount_amount * item['quantity'],
+            })
+
+    # Calculate totals from cart items
     total, quantity = calculate_totals(cart_items)
-
-    # Example tax calculation (2% of total)
-    tax = (Decimal(2) * total) / Decimal(100)
+    # Calculate tax and grand total
     total_after_discount = total - discount
     tax = (Decimal(2) * total_after_discount) / Decimal(100)  # Calculate tax after discount
     grand_total = total_after_discount + tax  # Calculate grand total
 
-    grand_total = round(grand_total, 2)  # Ensure consistent rounding
-
+    # Ensure consistent rounding
+    grand_total = round(grand_total, 2)
+   
     # Prepare context for rendering
     context = {
         'cart_items': cart_items,
-        'total': total,
-        'grand_total': round(grand_total),
-        'tax': tax,
+        'total': round(total, 2),  # Ensure total is rounded consistently
+        'grand_total': grand_total,
+        'tax': round(tax, 2),
         'cart_empty': not cart_items,
-        'discount': round(float(discount), 4),
+        # 'discount': round(float(discount), 2),
+        'cart': cart  # Include the cart in context for template access
     }
+    
     return render(request, 'cart.html', context)
-
-
 
 @login_required(login_url='login')
 def Checkout(request):
@@ -381,19 +261,18 @@ def Checkout(request):
         sub_total = cart_item.product.discount_amount * cart_item.quantity
         total += sub_total
         quantity += cart_item.quantity
-
-    # Retrieve discount from session
-    discount = Decimal(request.session.get('discount', 0))  # Default to 0 if not set
     # Calculate Total After Discount
     total_after_discount = total - discount
     # Calculate tax
-    tax = (Decimal(2) * total_after_discount) / Decimal(100)  # 2% tax
+    tax = (total_after_discount * tax_rate)  # Calculate 2% tax
     # Grand Total Calculation
     grand_total = total_after_discount + tax
+
     # Ensure grand total does not go negative
     if grand_total < 0:
         grand_total = Decimal(0)
-    # Create an Order instance and save it
+
+    # Handle order submission
     if request.method == 'POST':
         order = Order.objects.create(
             user=current_user,
@@ -413,17 +292,16 @@ def Checkout(request):
         # Clear the cart or mark items as purchased
         cart_items.delete()  # Adjust as necessary for your application logic
         # Clear the session discount after order creation
-        # Redirect to the order success page
         return redirect('order_success')
+
     context = {
         'cart_items': cart_items,
         'total': total,
         'quantity': quantity,
-        'tax': tax,
-        'grand_total': round(grand_total),
-        'discount': round(float(discount), 4),  # Optional: Include discount in context
+        'tax': round(tax, 2),  # Round tax for display consistency
+        'grand_total': round(grand_total, 2),  # Round to two decimal places
+        'discount': round(float(discount), 2),  # Optional: Include discount in context
     }
-    # grand_total = round(grand_total, 2)  # Round to two decimal places
 
     return render(request, 'accounts/checkout.html', context)
 

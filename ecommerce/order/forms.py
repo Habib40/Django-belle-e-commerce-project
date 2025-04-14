@@ -31,10 +31,12 @@ def clean_phone(self):
     # Remove any non-numeric characters
     phone = ''.join(filter(str.isdigit, phone))
 
-    # Validate the length of the phone number
-    if len(phone)  != 11:
-        raise forms.ValidationError('Number should not be more than 11 digits.')
-
+  # Validate the length of the phone number
+    if len(phone) != 11:
+        if len(phone) > 11:
+            raise forms.ValidationError('Number should not be more than 11 digits.')
+        else:
+            raise forms.ValidationError('Number should be exactly 11 digits.')
     return phone
 def clean_email(self):
     email = self.cleaned_data.get('email')

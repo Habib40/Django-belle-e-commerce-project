@@ -72,11 +72,6 @@ class RegisterView(View):
                 messages.error(request, error)
 
         return render(request, 'accounts/register.html', {'forms': forms})
-    
-    
-    
-
-
 
 def login_view(request):
     if request.method == 'POST':

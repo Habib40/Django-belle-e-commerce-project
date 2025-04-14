@@ -6,7 +6,7 @@ import requests
 class OrderAdmin(admin.ModelAdmin):
     list_display = (
         'order_number', 'get_payment_id', 'get_payment_method', 'cash_on_delivery',
-        'full_name', 'email', 'order_total', 'status', 'created_at',
+        'full_name', 'email','order_total', 'status', 'created_at',
     )
     actions = ['send_to_courier']
     search_fields = ('order_number', 'user__first_name', 'user__last_name', 'email')
@@ -77,7 +77,7 @@ class OrderProductAdmin(admin.ModelAdmin):
         'order_id', 
         'customer_email', 
         'product_list',  # This will show grouped products
-        'discount',
+        
         'color' ,
         'size', 
         'product_price', 

@@ -37,6 +37,7 @@ class Order(models.Model):
     state = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
     order_note = models.CharField(max_length=150, blank=True)
+   
     order_total = models.FloatField()
     tax = models.FloatField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
@@ -68,7 +69,7 @@ class OrderProduct(models.Model):
     # Direct fields for color and size
     color = models.CharField(max_length=50, null=True, blank=True)
     size = models.CharField(max_length=50, null=True, blank=True)
-    discount = models.FloatField(default=0)  # Add discount field
+    
     quantity =models.IntegerField()
     product_price = models.FloatField()
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)

@@ -14,6 +14,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.utils.text import slugify
+from django.db.models import Q
 # Create your views here.
 
 
@@ -186,6 +187,17 @@ def remove_from_wishlist(request, item_id):
     item.delete()
     messages.success(request, "Item removed from your wishlist.")
     return redirect('myWishList')
+
+
+def Search(request):
+    if 'keyword' in request.GET:
+        keyword = request.GET['keyword']
+        if keyword:
+            products = Product.objects.order_by('-created_at').filter(
+                Q(description__icontains=keyword) | Q(title__icontains=keyword)
+            )
+            count = products.count()  # Count the number of available products
+            return render(request, 'shop/store.html', {'products': products,'count':count})
 
 
 def LoadProducts(request):
