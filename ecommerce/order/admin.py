@@ -19,7 +19,7 @@ class OrderAdmin(admin.ModelAdmin):
         'first_name', 'last_name', 'phone', 'email', 
         'address_line_1', 'address_line_2', 'country', 
         'state', 'city', 'order_note', 'order_total', 
-        'tax', 'shipping_fee', 'status'
+        'tax','discount', 'shipping_fee', 'status'
     )
 
     def full_name(self, obj):

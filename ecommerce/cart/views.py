@@ -175,7 +175,7 @@ def Remove_cart(request, product_id, color, size):
     return redirect('carts')
 
 
-def calculate_totals(cart_items):
+def calculate_totals(cart_items, coupon=None):
     total = Decimal(0)
     quantity = 0
     for cart_item in cart_items:
@@ -186,8 +186,13 @@ def calculate_totals(cart_items):
             item_total = cart_item.product.discount_amount * cart_item.quantity
             quantity += cart_item.quantity
         total += item_total
-    return total, quantity
 
+    # Apply coupon discount
+    if coupon:
+        if coupon.discount:
+            total -= (total * coupon.discount / 100)
+
+    return total, quantity
 def CartPage(request, total=0, quantity=0, cart_items=None):
     current_user = request.user
     tax = Decimal(0)
@@ -222,7 +227,7 @@ def CartPage(request, total=0, quantity=0, cart_items=None):
             })
 
     # Calculate totals from cart items
-    total, quantity = calculate_totals(cart_items)
+    total, quantity = calculate_totals(cart_items, cart.coupon if cart else None)
     # Calculate tax and grand total
     total_after_discount = total - discount
     tax = (Decimal(2) * total_after_discount) / Decimal(100)  # Calculate tax after discount
@@ -238,7 +243,6 @@ def CartPage(request, total=0, quantity=0, cart_items=None):
         'grand_total': grand_total,
         'tax': round(tax, 2),
         'cart_empty': not cart_items,
-        # 'discount': round(float(discount), 2),
         'cart': cart  # Include the cart in context for template access
     }
     
@@ -246,64 +250,164 @@ def CartPage(request, total=0, quantity=0, cart_items=None):
 
 @login_required(login_url='login')
 def Checkout(request):
-    # Initialize totals
-    total = Decimal(0)
-    quantity = 0
-    tax_rate = Decimal(0.02)  # 2% tax
-    grand_total = Decimal(0)
-    discount = Decimal(0)
-
     current_user = request.user
+    cart = Cart.objects.filter(user=current_user).first()
     cart_items = CartItem.objects.filter(user=current_user, is_active=True)
 
-    # Calculate total, quantity, and subtotal for each item
-    for cart_item in cart_items:
-        sub_total = cart_item.product.discount_amount * cart_item.quantity
+    total = Decimal(0)
+    quantity = 0
+    discount = Decimal(0)
+    tax_rate = Decimal('0.02')  # 2% tax
+
+    # Calculate total and quantity
+    for item in cart_items:
+        sub_total = item.product.discount_amount * item.quantity
         total += sub_total
-        quantity += cart_item.quantity
-    # Calculate Total After Discount
-    total_after_discount = total - discount
-    # Calculate tax
-    tax = (total_after_discount * tax_rate)  # Calculate 2% tax
-    # Grand Total Calculation
-    grand_total = total_after_discount + tax
+        quantity += item.quantity
 
-    # Ensure grand total does not go negative
-    if grand_total < 0:
-        grand_total = Decimal(0)
-
-    # Handle order submission
+    # Handle order creation
     if request.method == 'POST':
+        # Recalculate in POST to ensure consistency
+        total = Decimal(0)
+        for item in cart_items:
+            total += item.product.discount_amount * item.quantity
+
+        discount = Decimal(0)
+        coupon = None
+
+        # Apply coupon if valid
+        if cart and cart.coupon and cart.coupon.is_valid():
+            coupon = cart.coupon
+            discount = (total * coupon.discount / 100)
+            coupon.used_count += 1
+            coupon.save()
+
+        total_after_discount = total - discount
+        tax = total_after_discount * tax_rate
+        grand_total = total_after_discount + tax
+
+        # Prevent negative total
+        if grand_total < 0:
+            grand_total = Decimal(0)
+
+        # Save the order
         order = Order.objects.create(
             user=current_user,
-            total_price=grand_total,
-            original_price=total,
+            order_total=grand_total,
             tax=tax,
-            discount=discount
+            discount=discount,
+            coupon=coupon
         )
-        # Add items to the order
-        for cart_item in cart_items:
+
+        # Save ordered products
+        for item in cart_items:
             OrderProduct.objects.create(
                 order=order,
-                product=cart_item.product,
-                quantity=cart_item.quantity,
-                price=cart_item.product.discount_amount
+                product=item.product,
+                quantity=item.quantity,
+                product_price=item.product.discount_amount
             )
-        # Clear the cart or mark items as purchased
-        cart_items.delete()  # Adjust as necessary for your application logic
-        # Clear the session discount after order creation
+        
+        # Clear cart and coupon
+        cart_items.delete()
+        if cart:
+            cart.coupon = None
+            cart.save()
+
         return redirect('order_success')
+
+    # Calculate tax and grand total for display (GET request)
+    if cart and cart.coupon and cart.coupon.is_valid():
+        discount = (total * cart.coupon.discount / 100)
+        total_after_discount = total - discount
+    else:
+        total_after_discount = total
+        discount = Decimal(0)
+
+    tax = total_after_discount * tax_rate
+    grand_total = total_after_discount + tax
 
     context = {
         'cart_items': cart_items,
-        'total': total,
+        'total': round(total, 2),
         'quantity': quantity,
-        'tax': round(tax, 2),  # Round tax for display consistency
-        'grand_total': round(grand_total, 2),  # Round to two decimal places
-        'discount': round(float(discount), 2),  # Optional: Include discount in context
+        'tax': round(tax, 2),
+        'grand_total': round(grand_total, 2),
+        'discount': round(discount, 2),
     }
 
     return render(request, 'accounts/checkout.html', context)
+
+
+# @login_required(login_url='login')
+# def Checkout(request):
+#     total = Decimal(0)
+#     quantity = 0
+#     tax_rate = Decimal(0.02)  # 2% tax
+#     grand_total = Decimal(0)
+#     discount = Decimal(0)
+
+#     current_user = request.user
+#     cart = Cart.objects.filter(user=current_user).first()
+#     cart_items = CartItem.objects.filter(user=current_user, is_active=True)
+
+#     # Calculate total, quantity, and subtotal for each item
+#     for cart_item in cart_items:
+#         sub_total = cart_item.product.discount_amount * cart_item.quantity
+#         total += sub_total
+#         quantity += cart_item.quantity
+
+#     # Apply coupon discount
+#     if cart and cart.coupon:
+#         coupon = cart.coupon
+#         if coupon.is_valid():
+#             discount = (total * coupon.discount / 100)
+#             total -= discount
+#         else:
+#             messages.error(request, "Coupon is not valid.")
+
+#     # Calculate Total After Discount
+#     total_after_discount = total
+#     # Calculate tax
+#     tax = (total_after_discount * tax_rate)
+#     # Grand Total Calculation
+#     grand_total = total_after_discount + tax
+
+#     # Ensure grand total does not go negative
+#     if grand_total < 0:
+#         grand_total = Decimal(0)
+
+#     # Handle order submission
+#     if request.method == 'POST':
+#         order = Order.objects.create(
+#             user=current_user,
+#             order_total=grand_total,  # Ensure this reflects the discounted total
+#             original_price=total + discount,  # Store the original total before discount
+#             tax=tax,
+#             discount=discount  # Store the discount
+#         )
+#         # Add items to the order
+#         for cart_item in cart_items:
+#             OrderProduct.objects.create(
+#                 order=order,
+#                 product=cart_item.product,
+#                 quantity=cart_item.quantity,
+#                 product_price=cart_item.product.discount_amount
+#             )
+#         # Clear the cart or mark items as purchased
+#         cart_items.delete()
+#         return redirect('order_success')
+
+#     context = {
+#         'cart_items': cart_items,
+#         'total': total,
+#         'quantity': quantity,
+#         'tax': round(tax, 2),
+#         'grand_total': round(grand_total, 2),
+#         'discount': round(float(discount), 2),
+#     }
+
+#     return render(request, 'accounts/checkout.html', context)
 
 def remove_cart_item(request, item_id):
     if request.method == 'POST':

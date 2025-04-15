@@ -11,10 +11,8 @@ class Cart(models.Model):
     user = models.ForeignKey(Account,on_delete=models.CASCADE,null=True)
     cart_id = models.CharField(max_length=250,blank=True,default=str(uuid.uuid4()))
     date_added = models.DateTimeField(auto_now_add=True)
+    coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)  # Add this line
   
-
-    def __str__(self):
-        return self.cart_id
     def __str__(self):
         return self.cart_id
 

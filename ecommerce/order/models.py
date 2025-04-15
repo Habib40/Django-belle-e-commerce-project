@@ -37,9 +37,9 @@ class Order(models.Model):
     state = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
     order_note = models.CharField(max_length=150, blank=True)
-   
     order_total = models.FloatField()
     tax = models.FloatField()
+    discount = models.FloatField(default=0) 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     ip = models.CharField(max_length=100, blank=True)
     is_ordered = models.BooleanField(default=False)
@@ -73,6 +73,7 @@ class OrderProduct(models.Model):
     quantity =models.IntegerField()
     product_price = models.FloatField()
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    coupon_discount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     ordered = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -30,6 +30,9 @@ from django.views import View
 import requests
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from cart.models import Cart , CartItem
+from promotions.models import Coupon
+from cart.views import calculate_totals 
 
 # stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -40,18 +43,47 @@ def PlaceOrder(request, total=0, tax=0, quantity=0):
     current_user = request.user
     cart_items = CartItem.objects.filter(user=current_user)
 
-    grand_total = 0
-    for cart_item in cart_items:
-        total += (cart_item.product.discount_amount or 0) * cart_item.quantity  # Handle None safely
-        quantity += cart_item.quantity
+    if not cart_items.exists():
+        messages.warning(request, "Your cart is empty.")
+        return redirect('store')
 
-    tax = (2 * total) / 100
-    grand_total = total + tax
+    # Fetch cart and coupon
+    cart = Cart.objects.filter(user=current_user).first()
+    coupon = cart.coupon if cart and cart.coupon else None
 
+    # Calculate base subtotal (without any discounts)
+    subtotal = sum(item.quantity * item.product.price for item in cart_items)
+    
+    # Calculate coupon discount (applied to subtotal)
+    coupon_discount = Decimal(0)
+    if coupon:
+        coupon_discount = (coupon.discount / Decimal(100)) * subtotal
+        coupon_discount = min(coupon_discount, subtotal)  # Ensure discount doesn't exceed subtotal
+
+    # Distribute coupon discount proportionally (without rounding)
+    distributed_coupon = {}
+    remaining_discount = coupon_discount
+    for i, item in enumerate(cart_items):
+        item_total = item.quantity * item.product.price
+        if i == len(cart_items) - 1:
+            # Assign remaining discount to the last item
+            distributed_coupon[item.id] = remaining_discount
+        else:
+            # Calculate exact proportional discount
+            item_coupon_discount = (item_total / subtotal) * coupon_discount
+            distributed_coupon[item.id] = item_coupon_discount
+            remaining_discount -= item_coupon_discount
+
+    # Calculate totals after discount
+    total_after_discount = subtotal - coupon_discount
+    tax = (Decimal(2) * total_after_discount) / Decimal(100)  # Example: 2% tax
+    grand_total = total_after_discount + tax
+
+    # Handle POST request (order creation)
     if request.method == 'POST':
         form = OrderForm(request.POST)
         if form.is_valid():
-            # Create an order instance
+            # Create Order
             order = Order(
                 user=current_user,
                 first_name=form.cleaned_data['first_name'],
@@ -64,53 +96,137 @@ def PlaceOrder(request, total=0, tax=0, quantity=0):
                 state=form.cleaned_data['state'],
                 city=form.cleaned_data['city'],
                 order_note=form.cleaned_data['order_note'],
+                order_total=grand_total,
                 tax=tax,
                 ip=request.META.get('REMOTE_ADDR'),
-                order_total=grand_total
+                discount=coupon_discount,
             )
-            order.save()  # Save the order first to get the ID
-            order.order_number = f"{datetime.date.today():%Y%d%m}-{order.id}"  # Use a more unique format
-            order.save()  # Save again to update the order number
+            order.save()
+            order.order_number = f"{datetime.date.today():%Y%d%m}-{order.id}"
+            order.save()
 
-            # Track if we can successfully create all order products
+            # Validate stock and create OrderProduct entries
             can_create_order = True
-
-            # Create OrderProduct instances
             for cart_item in cart_items:
                 if cart_item.quantity > cart_item.product.quantity_left:
                     messages.error(request, f"Not enough stock for {cart_item.product.title}.")
                     can_create_order = False
                     break
 
-                # Create OrderProduct instance
+                # Calculate final price per item (after coupon discount)
+                item_total = cart_item.quantity * cart_item.product.price
+                item_coupon_discount = distributed_coupon.get(cart_item.id, Decimal('0.00'))
+                final_price = item_total - item_coupon_discount
+
+                # Create OrderProduct - MAKE SURE TO INCLUDE USER!
                 OrderProduct.objects.create(
                     order=order,
-                    user=current_user,
+                    user=current_user,  # THIS WAS MISSING IN YOUR ORIGINAL CODE
                     product=cart_item.product,
-                    color=cart_item.color,
-                    size=cart_item.size,
                     quantity=cart_item.quantity,
                     product_price=cart_item.product.price,
-                    discount_amount=cart_item.product.discount_amount or 0,
+                    coupon_discount=item_coupon_discount,
+                    discount_amount=final_price,
+                    color=cart_item.color,  # Include if your model has these
+                    size=cart_item.size,    # Include if your model has these
                     ordered=True
                 )
 
             if can_create_order:
-                # Delete cart items after placing the order
                 cart_items.delete()
-
-                # Send a success message to the user
-                messages.success(request, 'Your order has been placed successfully!')
-
-                # Redirect to the payments page with order details
+                if coupon:  # Clear coupon after use if needed
+                    cart.coupon = None
+                    cart.save()
+                messages.success(request, 'Order placed successfully!')
                 return redirect('payments', order_id=order.id)
-
         else:
-            messages.error(request, 'Please correct the errors in the form.')
-            return render(request, 'accounts/checkout.html', {'form': form})
+            messages.error(request, 'Form errors. Please correct them.')
 
-    form = OrderForm()  # Initialize an empty form for GET requests
-    return render(request, 'accounts/checkout.html', {'form': form})
+    # Render checkout page (GET request)
+    form = OrderForm()
+    context = {
+        'form': form,
+        'cart_items': cart_items,
+        'grand_total': grand_total,
+    }
+    return render(request, 'accounts/checkout.html', context)
+
+# @login_required(login_url='login')
+# def PlaceOrder(request, total=0, tax=0, quantity=0):
+#     current_user = request.user
+#     cart_items = CartItem.objects.filter(user=current_user)
+
+#     grand_total = 0
+#     for cart_item in cart_items:
+#         total += (cart_item.product.discount_amount or 0) * cart_item.quantity  # Handle None safely
+#         quantity += cart_item.quantity
+
+#     tax = (2 * total) / 100
+#     grand_total = total + tax
+
+#     if request.method == 'POST':
+#         form = OrderForm(request.POST)
+#         if form.is_valid():
+#             # Create an order instance
+#             order = Order(
+#                 user=current_user,
+#                 first_name=form.cleaned_data['first_name'],
+#                 last_name=form.cleaned_data['last_name'],
+#                 email=form.cleaned_data['email'],
+#                 phone=form.cleaned_data['phone'],
+#                 address_line_1=form.cleaned_data['address_line_1'],
+#                 address_line_2=form.cleaned_data['address_line_2'],
+#                 country=form.cleaned_data['country'],
+#                 state=form.cleaned_data['state'],
+#                 city=form.cleaned_data['city'],
+#                 order_note=form.cleaned_data['order_note'],
+#                 tax=tax,
+#                 ip=request.META.get('REMOTE_ADDR'),
+#                 order_total=grand_total
+#             )
+#             order.save()  # Save the order first to get the ID
+#             order.order_number = f"{datetime.date.today():%Y%d%m}-{order.id}"  # Use a more unique format
+#             order.save()  # Save again to update the order number
+
+#             # Track if we can successfully create all order products
+#             can_create_order = True
+
+#             # Create OrderProduct instances
+#             for cart_item in cart_items:
+#                 if cart_item.quantity > cart_item.product.quantity_left:
+#                     messages.error(request, f"Not enough stock for {cart_item.product.title}.")
+#                     can_create_order = False
+#                     break
+
+#                 # Create OrderProduct instance
+#                 OrderProduct.objects.create(
+#                     order=order,
+#                     user=current_user,
+#                     product=cart_item.product,
+#                     color=cart_item.color,
+#                     size=cart_item.size,
+#                     quantity=cart_item.quantity,
+#                     product_price=cart_item.product.price,
+#                     discount_amount=cart_item.product.discount_amount or 0,
+#                     ordered=True
+#                 )
+
+#             if can_create_order:
+#                 # Delete cart items after placing the order
+#                 cart_items.delete()
+
+#                 # Send a success message to the user
+#                 messages.success(request, 'Your order has been placed successfully!')
+
+#                 # Redirect to the payments page with order details
+#                 return redirect('payments', order_id=order.id)
+
+#         else:
+#             messages.error(request, 'Please correct the errors in the form.')
+#             return render(request, 'accounts/checkout.html', {'form': form})
+
+#     form = OrderForm()  # Initialize an empty form for GET requests
+#     return render(request, 'accounts/checkout.html', {'form': form})
 
 
 def Payments(request, order_id, quantity=0):
