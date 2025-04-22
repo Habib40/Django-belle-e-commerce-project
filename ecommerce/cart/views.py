@@ -13,6 +13,8 @@ from django.contrib.auth.decorators import login_required
 import logging
 from decimal import Decimal
 from order.models import OrderProduct,Order
+from order.forms import OrderForm
+import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -21,63 +23,109 @@ def _cart_id(request):
     if not cart:
         cart = request.session.create()
     return cart
+def get_or_create_cart(request):
+    current_user = request.user
+    cart_id = _cart_id(request)
     
+    if current_user.is_authenticated:
+        cart, created = Cart.objects.get_or_create(user=current_user)
+    else:
+        cart, created = Cart.objects.get_or_create(
+            cart_id=cart_id,
+            defaults={'is_guest': True}
+        )
+    
+    return cart
 def Add_to_Cart(request, product_id):
     current_user = request.user
-    cart = _cart_id(request)  # Get or create cart_id from session
+    product = get_object_or_404(Product, id=product_id)
 
     if request.method == 'POST':
-        product = get_object_or_404(Product, id=product_id)
         color = request.POST.get('color')
         size = request.POST.get('size')
         quantity = int(request.POST.get('quantity', 1))
-
-        # Handle authenticated users
+        
+        cart = get_or_create_cart(request)
+        
+        # Check if item already exists in cart
+        cart_item, created = CartItem.objects.get_or_create(
+            cart=cart,
+            product=product,
+            color=color,
+            size=size,
+            defaults={
+                'quantity': quantity,
+                'user': current_user if current_user.is_authenticated else None
+            }
+        )
+        
+        if not created:
+            cart_item.quantity += quantity
+            cart_item.save()
+        
         if current_user.is_authenticated:
-            cart, created = Cart.objects.get_or_create(user=current_user)
-
-            # Create or update the CartItem
-            cart_item, created = CartItem.objects.get_or_create(
-                cart=cart,
-                product=product,
-                color=color,
-                size=size,
-                defaults={'quantity': quantity, 'user': current_user}
-            )
-
-            if not created:
-                cart_item.quantity += quantity
-                cart_item.save()
-            #  # Remove the item from the wishlist if it exists
-             
+            # Remove from wishlist if exists
             WishList.objects.filter(user=current_user, wish_product=product).delete()
-        else:
-            # Handle unauthenticated users
-            if 'cart_items' not in request.session:
-                request.session['cart_items'] = []
+        
+        return redirect('carts')
+    
+    return redirect('carts')
+# def Add_to_Cart(request, product_id):
+#     current_user = request.user
+#     cart = _cart_id(request)  # Get or create cart_id from session
 
-            # Check if the item already exists in the session cart
-            item_exists = False
-            for item in request.session['cart_items']:
-                if item['product_id'] == product.id and item['color'] == color and item['size'] == size:
-                    item['quantity'] += quantity
-                    item_exists = True
-                    break
+#     if request.method == 'POST':
+#         product = get_object_or_404(Product, id=product_id)
+#         color = request.POST.get('color')
+#         size = request.POST.get('size')
+#         quantity = int(request.POST.get('quantity', 1))
 
-            if not item_exists:
-                request.session['cart_items'].append({
-                    'product_id': product.id,
-                    'color': color,
-                    'size': size,
-                    'quantity': quantity
-                })
+#         # Handle authenticated users
+#         if current_user.is_authenticated:
+#             cart, created = Cart.objects.get_or_create(user=current_user)
 
-            request.session.modified = True  # Mark the session as modified
+#             # Create or update the CartItem
+#             cart_item, created = CartItem.objects.get_or_create(
+#                 cart=cart,
+#                 product=product,
+#                 color=color,
+#                 size=size,
+#                 defaults={'quantity': quantity, 'user': current_user}
+#             )
+
+#             if not created:
+#                 cart_item.quantity += quantity
+#                 cart_item.save()
+#             #  # Remove the item from the wishlist if it exists
+             
+#             WishList.objects.filter(user=current_user, wish_product=product).delete()
+#         else:
+#             # Handle unauthenticated users
+#             if 'cart_items' not in request.session:
+#                 request.session['cart_items'] = []
+
+#             # Check if the item already exists in the session cart
+#             item_exists = False
+#             for item in request.session['cart_items']:
+#                 if item['product_id'] == product.id and item['color'] == color and item['size'] == size:
+#                     item['quantity'] += quantity
+#                     item_exists = True
+#                     break
+
+#             if not item_exists:
+#                 request.session['cart_items'].append({
+#                     'product_id': product.id,
+#                     'color': color,
+#                     'size': size,
+#                     'quantity': quantity
+#                 })
+
+#             request.session.modified = True  # Mark the session as modified
            
 
-        return redirect('carts')
-    else:
-        return redirect('carts')
+#         return redirect('carts')
+#     else:
+#         return redirect('carts')
 
 def minus_cart(request, product_id, color, size):
     if request.method == 'POST':
@@ -247,12 +295,24 @@ def CartPage(request, total=0, quantity=0, cart_items=None):
     }
     
     return render(request, 'cart.html', context)
-
-@login_required(login_url='login')
 def Checkout(request):
     current_user = request.user
-    cart = Cart.objects.filter(user=current_user).first()
-    cart_items = CartItem.objects.filter(user=current_user, is_active=True)
+    is_guest = not current_user.is_authenticated
+    
+    if is_guest:
+        cart_id = _cart_id(request)
+        cart = Cart.objects.filter(cart_id=cart_id, is_guest=True).first()
+        cart_items = CartItem.objects.filter(cart=cart, is_active=True) if cart else []
+    else:
+        cart = Cart.objects.filter(user=current_user).first()
+        cart_items = CartItem.objects.filter(user=current_user, is_active=True)
+
+    # if not cart_items.exists():
+    #     messages.warning(request, "Your cart is empty.")
+    #     return redirect('store')
+    if (is_guest and not cart) or not cart_items.exists():
+        messages.warning(request, "Your cart is empty.")
+        return redirect('store')
 
     total = Decimal(0)
     quantity = 0
@@ -261,60 +321,85 @@ def Checkout(request):
 
     # Calculate total and quantity
     for item in cart_items:
-        sub_total = item.product.discount_amount * item.quantity
-        total += sub_total
+        total += item.sub_total()
         quantity += item.quantity
 
     # Handle order creation
     if request.method == 'POST':
-        # Recalculate in POST to ensure consistency
-        total = Decimal(0)
-        for item in cart_items:
-            total += item.product.discount_amount * item.quantity
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            # Recalculate totals
+            total = sum(item.sub_total() for item in cart_items)
+            
+            # Apply coupon if valid
+            if cart and cart.coupon and cart.coupon.is_valid():
+                coupon = cart.coupon
+                discount = (total * coupon.discount / 100)
+                coupon.used_count += 1
+                coupon.save()
+            else:
+                coupon = None
 
-        discount = Decimal(0)
-        coupon = None
+            total_after_discount = total - discount
+            tax = total_after_discount * tax_rate
+            grand_total = total_after_discount + tax
 
-        # Apply coupon if valid
-        if cart and cart.coupon and cart.coupon.is_valid():
-            coupon = cart.coupon
-            discount = (total * coupon.discount / 100)
-            coupon.used_count += 1
-            coupon.save()
+            # Prevent negative total
+            if grand_total < 0:
+                grand_total = Decimal(0)
 
-        total_after_discount = total - discount
-        tax = total_after_discount * tax_rate
-        grand_total = total_after_discount + tax
+            # Create order
+            order_data = {
+                'first_name': form.cleaned_data['first_name'],
+                'last_name': form.cleaned_data['last_name'],
+                'email': form.cleaned_data['email'],
+                'phone': form.cleaned_data['phone'],
+                'address_line_1': form.cleaned_data['address_line_1'],
+                'address_line_2': form.cleaned_data['address_line_2'],
+                'country': form.cleaned_data['country'],
+                'state': form.cleaned_data['state'],
+                'city': form.cleaned_data['city'],
+                'order_note': form.cleaned_data['order_note'],
+                'order_total': grand_total,
+                'tax': tax,
+                'ip': request.META.get('REMOTE_ADDR'),
+                'discount': discount,
+                'coupon': coupon,
+            }
+            
+            if not is_guest:
+                order_data['user'] = current_user
+            
+            order = Order.objects.create(**order_data)
+            order.order_number = f"{datetime.date.today():%Y%d%m}-{order.id}"
+            order.save()
 
-        # Prevent negative total
-        if grand_total < 0:
-            grand_total = Decimal(0)
+            # Create order products
+            for item in cart_items:
+                OrderProduct.objects.create(
+                    order=order,
+                    user=item.user,  # Could be None for guest
+                    product=item.product,
+                    quantity=item.quantity,
+                    product_price=item.product.discount_amount,
+                    color=item.color,
+                    size=item.size
+                )
+            
+            # Clear cart
+            cart_items.delete()
+            if cart:
+                cart.coupon = None
+                cart.save()
 
-        # Save the order
-        order = Order.objects.create(
-            user=current_user,
-            order_total=grand_total,
-            tax=tax,
-            discount=discount,
-            coupon=coupon
-        )
+            # For guest users, clear the session cart
+            if is_guest:
+                if 'cart_id' in request.session:
+                    del request.session['cart_id']
 
-        # Save ordered products
-        for item in cart_items:
-            OrderProduct.objects.create(
-                order=order,
-                product=item.product,
-                quantity=item.quantity,
-                product_price=item.product.discount_amount
-            )
-        
-        # Clear cart and coupon
-        cart_items.delete()
-        if cart:
-            cart.coupon = None
-            cart.save()
-
-        return redirect('order_success')
+            return redirect('order_success')
+        else:
+            messages.error(request, 'Form errors. Please correct them.')
 
     # Calculate tax and grand total for display (GET request)
     if cart and cart.coupon and cart.coupon.is_valid():
@@ -327,84 +412,117 @@ def Checkout(request):
     tax = total_after_discount * tax_rate
     grand_total = total_after_discount + tax
 
+    # For guest checkout, we need to create a form
+    initial_data = {}
+    if not is_guest and current_user:
+        initial_data = {
+            'first_name': current_user.first_name,
+            'last_name': current_user.last_name,
+            'email': current_user.email,
+            'phone': current_user.phone_number,
+        }
+
+    form = OrderForm(initial=initial_data)
+
     context = {
+        'form': form,
         'cart_items': cart_items,
         'total': round(total, 2),
         'quantity': quantity,
         'tax': round(tax, 2),
         'grand_total': round(grand_total, 2),
         'discount': round(discount, 2),
+        'is_guest': is_guest,
     }
 
     return render(request, 'accounts/checkout.html', context)
 
-
 # @login_required(login_url='login')
 # def Checkout(request):
-#     total = Decimal(0)
-#     quantity = 0
-#     tax_rate = Decimal(0.02)  # 2% tax
-#     grand_total = Decimal(0)
-#     discount = Decimal(0)
-
 #     current_user = request.user
 #     cart = Cart.objects.filter(user=current_user).first()
 #     cart_items = CartItem.objects.filter(user=current_user, is_active=True)
 
-#     # Calculate total, quantity, and subtotal for each item
-#     for cart_item in cart_items:
-#         sub_total = cart_item.product.discount_amount * cart_item.quantity
+#     total = Decimal(0)
+#     quantity = 0
+#     discount = Decimal(0)
+#     tax_rate = Decimal('0.02')  # 2% tax
+
+#     # Calculate total and quantity
+#     for item in cart_items:
+#         sub_total = item.product.discount_amount * item.quantity
 #         total += sub_total
-#         quantity += cart_item.quantity
+#         quantity += item.quantity
 
-#     # Apply coupon discount
-#     if cart and cart.coupon:
-#         coupon = cart.coupon
-#         if coupon.is_valid():
-#             discount = (total * coupon.discount / 100)
-#             total -= discount
-#         else:
-#             messages.error(request, "Coupon is not valid.")
-
-#     # Calculate Total After Discount
-#     total_after_discount = total
-#     # Calculate tax
-#     tax = (total_after_discount * tax_rate)
-#     # Grand Total Calculation
-#     grand_total = total_after_discount + tax
-
-#     # Ensure grand total does not go negative
-#     if grand_total < 0:
-#         grand_total = Decimal(0)
-
-#     # Handle order submission
+#     # Handle order creation
 #     if request.method == 'POST':
+#         # Recalculate in POST to ensure consistency
+#         total = Decimal(0)
+#         for item in cart_items:
+#             total += item.product.discount_amount * item.quantity
+
+#         discount = Decimal(0)
+#         coupon = None
+
+#         # Apply coupon if valid
+#         if cart and cart.coupon and cart.coupon.is_valid():
+#             coupon = cart.coupon
+#             discount = (total * coupon.discount / 100)
+#             coupon.used_count += 1
+#             coupon.save()
+
+#         total_after_discount = total - discount
+#         tax = total_after_discount * tax_rate
+#         grand_total = total_after_discount + tax
+
+#         # Prevent negative total
+#         if grand_total < 0:
+#             grand_total = Decimal(0)
+
+#         # Save the order
 #         order = Order.objects.create(
 #             user=current_user,
-#             order_total=grand_total,  # Ensure this reflects the discounted total
-#             original_price=total + discount,  # Store the original total before discount
+#             order_total=grand_total,
 #             tax=tax,
-#             discount=discount  # Store the discount
+#             discount=discount,
+#             coupon=coupon
 #         )
-#         # Add items to the order
-#         for cart_item in cart_items:
+
+#         # Save ordered products
+#         for item in cart_items:
 #             OrderProduct.objects.create(
 #                 order=order,
-#                 product=cart_item.product,
-#                 quantity=cart_item.quantity,
-#                 product_price=cart_item.product.discount_amount
+#                 product=item.product,
+#                 quantity=item.quantity,
+#                 product_price=item.product.discount_amount
 #             )
-#         # Clear the cart or mark items as purchased
+        
+#         # Clear cart and coupon
 #         cart_items.delete()
+#         if cart:
+#             cart.coupon = None
+#             cart.save()
+
 #         return redirect('order_success')
+
+#     # Calculate tax and grand total for display (GET request)
+#     if cart and cart.coupon and cart.coupon.is_valid():
+#         discount = (total * cart.coupon.discount / 100)
+#         total_after_discount = total - discount
+#     else:
+#         total_after_discount = total
+#         discount = Decimal(0)
+
+#     tax = total_after_discount * tax_rate
+#     grand_total = total_after_discount + tax
 
 #     context = {
 #         'cart_items': cart_items,
-#         'total': total,
+#         'total': round(total, 2),
 #         'quantity': quantity,
 #         'tax': round(tax, 2),
 #         'grand_total': round(grand_total, 2),
-#         'discount': round(float(discount), 2),
+#         'discount': round(discount, 2),
 #     }
 
 #     return render(request, 'accounts/checkout.html', context)

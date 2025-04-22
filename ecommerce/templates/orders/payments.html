@@ -5,7 +5,7 @@
 <section class="section-content padding-y bg">
     <div class="container">
         <h4 class="text-center mb-10">Review Your Order And Make Payment</h4>
-        <form method="POST" action="{% url 'payments' order.id %}">  <!-- Make sure the action points to the correct view -->
+        <form method="POST" action="{% url 'payments' order.id %}">
             {% csrf_token %}
             <div class="row">
                 <aside class="col-lg-8">
@@ -24,6 +24,17 @@
                             {% if order.order_note %}
                             <b>Order Note: {{ order.order_note }}</b>
                             {% endif %}
+                            
+                            <!-- Guest User Notice -->
+                            {% if not request.user.is_authenticated %}
+                            <div class="alert alert-info mt-3">
+                                <h6>Guest Order Notice</h6>
+                                <p>
+                                    Please save your order number (#{{ order.order_number }}) for future reference.
+                                    <a href="{% url 'register' %}" class="alert-link">Create an account</a> to track your orders easily.
+                                </p>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                     <br>
@@ -35,7 +46,7 @@
                                     <tr class="small text-uppercase">
                                         <th scope="col">Product</th>
                                         <th scope="col" width="120">Quantity</th>
-                                        <th scope="col" width="120">Price</th>
+                                        <!-- <th scope="col" width="120">Price</th> -->
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -56,12 +67,12 @@
                                                 <label class="mb-0">{{ order_product.quantity }}</label>
                                             </div>
                                         </td>
-                                        <td class="text-center">
+                                        <!-- <td class="text-center">
                                             <div class="col">
-                                                Unit Price: ${{ order_product.discount_amount|floatformat:2 }}<br>
-                                                Sub Total: ${{ order_product.sub_total|floatformat:2 }}
+                                                Unit Price: ${{ order_product.discount_amount|floatformat:0 }}<br>
+                                                Sub Total: ${{ order_product.sub_total|floatformat:0 }}
                                             </div>
-                                        </td>
+                                        </td> -->
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -69,7 +80,7 @@
                                     <tr>
                                         <td colspan="2" class="text-right">
                                             <strong>Grand Total With Tax:</strong>
-                                            <var class="price">$ {{ grand_total|floatformat:2 }}</var>
+                                            <var class="price">$ {{ grand_total|floatformat:0 }}</var>
                                         </td>
                                     </tr>
                                 </tfoot>
@@ -81,16 +92,21 @@
                     <div class="card" style="padding: 20px;">
                         <div class="solid-border">
                             <div class="row">
+                                <span class="col-12 col-sm-6 cart__subtotal-title"><strong>Subtotal</strong></span>
+                                <span class="col-12 col-sm-6 cart__subtotal-title cart__subtotal text-right">
+                                    <span class="money">${{ sub_total|floatformat:0 }}</span>
+                                </span>
+                            </div>
+                            <div class="row">
                                 <span class="col-12 col-sm-6 cart__subtotal-title"><strong>TAX</strong></span>
                                 <span class="col-12 col-sm-6 cart__subtotal-title cart__subtotal text-right">
-                                    <span class="money">${{ tax|floatformat:0 }}</span>
+                                    <span class="money">${{ tax|floatformat:2 }}</span>
                                 </span>
                             </div>
                             <div class="row">
                                 <span class="col-12 col-sm-6 cart__subtotal-title"><strong>Grand Total</strong></span>
                                 <span class="col-12 col-sm-6 cart__subtotal-title cart__subtotal text-right">
-                                    <span class="money">${{ grand_total|floatformat:0  }}</span>
-                                    
+                                    <span class="money">${{ grand_total|floatformat:0 }}</span>
                                 </span>
                             </div>
                             <div class="cart__shipping">Shipping &amp; taxes calculated at checkout</div>
@@ -102,55 +118,37 @@
                             </p>
                             <div class="d-flex justify-content-between mt-3">
                                 <!-- Cash on Delivery Button -->
-                                <button type="submit" name="payment_method" value="cash_on_delivery" class="btn btn-outline-secondary me-2">Cash on Delivery</button>
+                                <button type="submit" name="payment_method" value="cash_on_delivery" class="btn btn-outline-secondary me-2">
+                                    Cash on Delivery
+                                </button>
                                 
                                 <!-- Make Payment Button -->
-                                <a href="{% url 'create_payment' order.id %}" class="btn btn-outline-success me-2">Make Payment</a>
-
-                                <!-- <input type="hidden" name="order_id" value="{{ order.id }}">
-                                <input type="hidden" name="success_url" value="{{ success_url }}">
-                                <input type="hidden" name="cancel_url" value="{{ cancel_url }}">
-                                <button type="button" id="proceedPayment" class="btn btn-primary">Proceed to Payment</button> -->
+                                <a href="{% url 'create_payment' order.id %}" class="btn btn-outline-success me-2">
+                                    Make Payment
+                                </a>
                             </div>
                             <hr>
                             <div class="text-align-center">
                                 <a href="{% url 'store' %}" class="btn btn-outline-primary d-flex btn-block">Continue Shopping</a>
                             </div>
                             <div class="paymnet-img">
-                                <img src="{% static 'assets/images/payment-img.jpg' %}" alt="Payment">
+                                <img src="{% static 'assets/images/payment-img.jpg' %}" alt="Payment" class="img-fluid">
                             </div>
                         </div>
                     </div>
                 </aside>
             </div>
         </form>
-        <!-- <script>
-            document.getElementById('proceedPayment').addEventListener('click', function() {
-                const orderId = document.querySelector('input[name="order_id"]').value;
-                const myHeaders = new Headers();
-                myHeaders.append("Cookie", "csrftoken={{ csrf_token }}; sessionid={{ request.session.session_key }}");
-        
-                const requestOptions = {
-                    method: "POST",
-                    headers: myHeaders,
-                    redirect: "follow",
-                    body: new URLSearchParams(new FormData(document.getElementById('paymentForm')))
-                };
-        
-                fetch(`/orders/create-payment/${orderId}/`, requestOptions)
-                    .then((response) => response.json())
-                    .then((data) => {
-                        if (data.status === 1 && data.payment_url) {
-                            // Redirect to the payment URL
-                            window.location.href = data.payment_url;
-                        } else {
-                            console.error('Error fetching payment link:', data.message);
-                        }
-                    })
-                    .catch((error) => console.error('Error:', error));
-            });
-        </script> -->
-    
     </div>
 </section>
+
+<!-- Terms and Conditions Validation -->
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    if (!document.getElementById('cartTearm').checked) {
+        e.preventDefault();
+        alert('Please agree to the terms and conditions before proceeding.');
+    }
+});
+</script>
 {% endblock %}

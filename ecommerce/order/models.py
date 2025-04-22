@@ -63,7 +63,7 @@ class Order(models.Model):
 class OrderProduct(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, null=True)
-    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)
     product = models.ForeignKey('shop.Product', on_delete=models.CASCADE)
     
     # Direct fields for color and size

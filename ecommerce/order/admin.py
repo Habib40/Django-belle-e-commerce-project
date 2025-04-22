@@ -5,7 +5,7 @@ import requests
 # Register your models here.
 class OrderAdmin(admin.ModelAdmin):
     list_display = (
-        'order_number', 'get_payment_id', 'get_payment_method', 'cash_on_delivery',
+        'order_number', 'get_payment_id', 'get_payment_method', 'cash_on_delivery','get_user_type',
         'full_name', 'email','order_total', 'status', 'created_at',
     )
     actions = ['send_to_courier']
@@ -21,6 +21,15 @@ class OrderAdmin(admin.ModelAdmin):
         'state', 'city', 'order_note', 'order_total', 
         'tax','discount', 'shipping_fee', 'status'
     )
+    def get_user_type(self, obj):
+        if obj.user:  # Check if the user is registered
+            return "Registered"
+        if obj.email:  # Check if the email is available for guest orders
+            return "Guest"
+        return "Unknown"
+
+    get_user_type.short_description = 'User Type'
+    
 
     def full_name(self, obj):
         return f"{obj.user.first_name} {obj.user.last_name}" if obj.user else "No User"
@@ -68,31 +77,41 @@ class OrderAdmin(admin.ModelAdmin):
 
     send_to_courier.short_description = "Send selected orders to courier"
     
+    
 
 admin.site.register(Order, OrderAdmin)
+
+
+
+
 
 
 class OrderProductAdmin(admin.ModelAdmin):
     list_display = (
         'order_id', 
         'customer_email', 
-        'product_list',  # This will show grouped products
-        
-        'color' ,
+        'product_list',
+        'color',
         'size', 
         'product_price', 
         'created_at', 
-        'order_status'
+        'order_status',
+        'user_type'  # New field to distinguish user types
     )
 
     def product_list(self, obj):
-        products = obj.order.orderproduct_set.all()  # Assuming this relationship exists
-        product_details = [f"- {prod.product.title}" for prod in products]
-        return format_html('<br>'.join(product_details))  # Use format_html to render HTML safely
+        products = OrderProduct.objects.filter(order=obj.order)
+        product_details = [f"{prod.product.title} (×{prod.quantity})" for prod in products]
+        return format_html('<br>'.join(product_details))
     product_list.short_description = 'Products'
 
     list_filter = ('ordered', 'created_at', 'product__category')  
-    search_fields = ('product__title', 'user__email', 'order__id')  
+    search_fields = (
+        'product__title', 
+        'user__email', 
+        'order__email',  # Added search by order email
+        'order__id'
+    )  
 
     readonly_fields = (
         'order', 
@@ -111,20 +130,38 @@ class OrderProductAdmin(admin.ModelAdmin):
         return self.readonly_fields
 
     def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.select_related('product', 'user', 'order')
+        return super().get_queryset(request).select_related(
+            'product', 'user', 'order'
+        )
 
     def order_id(self, obj):
-        return obj.order.id  
+        return obj.order.id if obj.order else "N/A"
     order_id.short_description = 'Order ID'
 
     def customer_email(self, obj):
-        return obj.user.email  
+        # First try user email (registered users)
+        if obj.user and obj.user.email:
+            return obj.user.email
+        # Fall back to order email (guest users)
+        if obj.order and obj.order.email:
+            return obj.order.email
+        return "No email"
     customer_email.short_description = 'Customer Email'
+    customer_email.admin_order_field = 'order__email'  # Enable sorting
 
     def order_status(self, obj):
-        return "Completed" if obj.ordered else "Pending"
+        if obj.order:
+            return obj.order.get_status_display()
+        return "No status"
     order_status.short_description = 'Order Status'
+
+    def user_type(self, obj):
+        if obj.user:
+            return "Registered"
+        if obj.order and obj.order.email:
+            return "Guest"
+        return "Unknown"
+    user_type.short_description = 'User Type'
 
 admin.site.register(OrderProduct, OrderProductAdmin)
 

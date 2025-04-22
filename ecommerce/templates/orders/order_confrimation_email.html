@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 30px;
+        }
+        .logo {
+            max-width: 150px;
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-top: 0;
+        }
+        .order-info {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .order-details {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .order-details th {
+            text-align: left;
+            padding: 8px;
+            background-color: #f2f2f2;
+            border-bottom: 1px solid #ddd;
+        }
+        .order-details td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        .order-details tr:last-child td {
+            border-bottom: none;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #f2f2f2;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white !important;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <!-- Replace with your logo -->
+        <img src="https://yourwebsite.com/static/images/logo.png" alt="Company Logo" class="logo">
+        <h1>Order Confirmation</h1>
+        <p>Thank you for your purchase!</p>
+    </div>
+
+    <div class="order-info">
+        <p><strong>Order Number:</strong> #{{ order.id }}</p>
+        <p><strong>Order Date:</strong> {{ order.created_at|date:"F j, Y" }}</p>
+        {% if order.tracking_number %}
+        <p><strong>Tracking Number:</strong> {{ order.tracking_number }}</p>
+        {% endif %}
+    </div>
+
+    <h2>Order Details</h2>
+    <table class="order-details">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in order_products %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>${{ item.product_price }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="order-details">
+        <tr>
+            <td>Subtotal:</td>
+            <td>${{ sub_total }}</td>
+        </tr>
+        <tr>
+            <td>Tax:</td>
+            <td>${{ tax }}</td>
+        </tr>
+        <tr class="total-row">
+            <td>Total:</td>
+            <td>${{ grand_total }}</td>
+        </tr>
+    </table>
+
+    <div style="text-align: center;">
+        <a href="https://{{ domain }}/orders/order_success/{{ order.id }}" class="button">View Your Order</a>
+    </div>
+
+    <div class="shipping-info">
+        <h2>Shipping Information</h2>
+        <p>
+            {{ order.first_name }} {{ order.last_name }}<br>
+            {{ order.address_line_1 }}<br>
+            {% if order.address_line_2 %}{{ order.address_line_2 }}<br>{% endif %}
+            {{ order.city }}, {{ order.state }} {{ order.zip_code }}<br>
+            {{ order.country }}<br>
+            Phone: {{ order.phone }}
+        </p>
+    </div>
+
+    <div class="footer">
+        <p>If you have any questions about your order, please contact our support team at support@yourwebsite.com</p>
+        <p>&copy; {% now "Y" %} Your Company Name. All rights reserved.</p>
+    </div>
+</body>
+</html>

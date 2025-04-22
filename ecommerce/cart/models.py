@@ -12,6 +12,7 @@ class Cart(models.Model):
     cart_id = models.CharField(max_length=250,blank=True,default=str(uuid.uuid4()))
     date_added = models.DateTimeField(auto_now_add=True)
     coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)  # Add this line
+    is_guest = models.BooleanField(default=False)  # New field to identify guest carts
   
     def __str__(self):
         return self.cart_id

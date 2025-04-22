@@ -11,9 +11,5 @@ urlpatterns =[
     path('success/', views.SuccessView.as_view(), name='payment_success'),
     path('cancel/', views.payment_cancel, name='payment_cancel'),
     path('invoice/<int:order_id>/', views.generate_invoice, name='generate_invoice'),
-    
-    
-    
-     
-   
+    path('order_success/<int:order_id>/', views.order_success, name='order_success'),
 ]

@@ -22,6 +22,7 @@ from django.core.mail import send_mail
 import requests
 import logging
 from decimal import Decimal, InvalidOperation
+from django.db import models
 
 logger = logging.getLogger(__name__)
 
@@ -157,32 +158,57 @@ def Activate(request,uidb64,token):
         
 
 
-
-
-
 @login_required(login_url='login')
 def Dashboard(request):
     try:
-        # Fetch Order instances for the logged-in user, ordered by creation date
-        orders = Order.objects.filter(user=request.user).order_by('-created_at')
-        # Initialize a list to hold the Order and OrderProduct instances
+        # Get orders where user is the logged-in user OR guest_email matches user's email
+        orders = Order.objects.filter(
+            models.Q(user=request.user) | 
+            models.Q(guest_email=request.user.email)
+        ).distinct().order_by('-created_at')
+        
         order_details = []
         for order in orders:
-            # Get related OrderProduct records
             order_products = OrderProduct.objects.filter(order=order).select_related('product')
-            # Append the order and its products directly to the list
             order_details.append({
                 'order': order,
-                'order_products': order_products
+                'order_products': order_products,
+                'is_guest_order': order.user is None  # This identifies guest orders
             })
         
-        # Render the dashboard template with the order details
         return render(request, 'accounts/dashboard.html', {
             'order_details': order_details,
-            'messages': request.session.pop('messages', [])  # Optional: to pass messages if any
+            'messages': messages.get_messages(request)
         })
+        
     except Exception as e:
-        return render(request, 'error.html', {'error': str(e)})
+       
+        return render(request, 'error.html', {'error': "An error occurred while loading your dashboard."})
+
+
+# @login_required(login_url='login')
+# def Dashboard(request):
+#     try:
+#         # Fetch Order instances for the logged-in user, ordered by creation date
+#         orders = Order.objects.filter(user=request.user).order_by('-created_at')
+#         # Initialize a list to hold the Order and OrderProduct instances
+#         order_details = []
+#         for order in orders:
+#             # Get related OrderProduct records
+#             order_products = OrderProduct.objects.filter(order=order).select_related('product')
+#             # Append the order and its products directly to the list
+#             order_details.append({
+#                 'order': order,
+#                 'order_products': order_products
+#             })
+        
+#         # Render the dashboard template with the order details
+#         return render(request, 'accounts/dashboard.html', {
+#             'order_details': order_details,
+#             'messages': request.session.pop('messages', [])  # Optional: to pass messages if any
+#         })
+#     except Exception as e:
+#         return render(request, 'error.html', {'error': str(e)})
     
     
     

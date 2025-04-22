@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-3 my-md-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10 col-xl-8">
+            <!-- Order Confirmation Header -->
+            <div class="text-center mb-4 mb-md-5">
+                <img src="{% static 'images/order-success.png' %}" alt="Success" class="img-fluid mb-3" style="max-width: 100px;">
+                <h1 class="h2 h1-md fw-bold text-success">Order Confirmed!</h1>
+                <p class="lead mb-0">Thank you for your purchase. Your order has been received.</p>
+            </div>
+            
+
+            <!-- Order Summary Card -->
+            <div class="card shadow-sm mb-4 mb-md-5">
+                <div class="card-header bg-light py-3">
+                    <h5 class="mb-0">Order Summary</h5>
+                </div>
+                <div class="card-body p-3 p-md-4">
+                    <div class="row mb-3 mb-md-4">
+                        <div class="col-12 col-md-6 mb-3 mb-md-0">
+                            <h6 class="fw-bold">Order Information</h6>
+                            <ul class="list-unstyled small">
+                                <li class="mb-1"><strong>Order #:</strong> {{ order.order_number }}</li>
+                                <li class="mb-1"><strong>Date:</strong> {{ order.created_at|date:"M j, Y H:i" }}</li>
+                                <li class="mb-1"><strong>Payment:</strong> {{ order.get_payment_method_display }}</li>
+                                <li><strong>Status:</strong> <span class="badge bg-success">{{ order.get_status_display }}</span></li>
+                            </ul>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <h6 class="fw-bold">Customer Information</h6>
+                            <ul class="list-unstyled small">
+                                <li class="mb-1"><strong>Email:</strong> {{ order.email }}</li>
+                                {% if order.phone %}<li><strong>Phone:</strong> {{ order.phone }}</li>{% endif %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Order Items - Mobile View -->
+                    <div class="d-block d-md-none">
+                        <h6 class="fw-bold border-bottom pb-2 mb-3">Items Ordered</h6>
+                        {% for item in order_products %}
+                        <div class="card mb-3">
+                            <div class="card-body p-3">
+                                <div class="d-flex">
+                                    {% if item.product.images %}
+                                    <img src="{{ item.product.images.url }}" alt="{{ item.product.product_name }}" width="60" class="me-3 rounded">
+                                    {% endif %}
+                                    <div class="w-100">
+                                        <h6 class="mb-1">{{ item.product.title|truncatechars:30 }}</h6>
+                                        <div class="d-flex justify-content-between small mb-1">
+                                            <span>${{ item.product.discount_amount|floatformat:2 }}</span>
+                                            <span>Qty: {{ item.quantity }}</span>
+                                        </div>
+                                        {% if item.color or item.size %}
+                                        <div class="small text-muted">
+                                            {% if item.color %}<span class="me-2">Color: {{ item.color }}</span>{% endif %}
+                                            {% if item.size %}<span>Size: {{ item.size }}</span>{% endif %}
+                                        </div>
+                                        <div class="text-end fw-bold mt-1">
+                                            ${{ sub_total|floatformat:2 }}
+                                        </div>
+                                        {% endif %}
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Order Items - Desktop View -->
+                    <div class="d-none d-md-block">
+                        <h6 class="fw-bold border-bottom pb-2 mb-3">Items Ordered</h6>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th class="text-end">Price</th>
+                                        <th class="text-center">Qty</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in order_products %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if item.product.images %}
+                                                <img src="{{ item.product.images.url }}" alt="{{ item.product.product_name }}" width="60" class="me-3 rounded">
+                                                {% endif %}
+                                                <div>
+                                                    <h6 class="mb-0">{{ item.product.title|truncatechars:50 }}</h6>
+                                                    {% if item.color or item.size %}
+                                                    <small class="text-muted">
+                                                        {% if item.color %}<span class="me-2">Color: {{ item.color }}</span>{% endif %}
+                                                        {% if item.size %}<span>Size: {{ item.size }}</span>{% endif %}
+                                                    </small>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-end">${{ item.product.discount_amount|floatformat:2 }}</td>
+                                        <td class="text-center">{{ item.quantity }}</td>
+                                        <td class="text-end fw-bold">${{ sub_total|floatformat:0 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Order Totals -->
+                    <div class="row justify-content-end mt-3 mt-md-4">
+                        <div class="col-12 col-md-8 col-lg-6">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    {% if order.discount %}
+                                    <tr class="text-danger">
+                                        <th class="ps-3">Discount</th>
+                                        <td class="text-end pe-3">-${{ order.discount|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    <tr class="fw-bold">
+                                        <th class="ps-3">Grand Total</th>
+                                        <td class="text-end pe-3">${{ grand_total|floatformat:0 }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping Information -->
+            <div class="card shadow-sm mb-4 mb-md-5">
+                <div class="card-header bg-light py-3">
+                    <h5 class="mb-0">Shipping Details</h5>
+                </div>
+                <div class="card-body p-3 p-md-4">
+                    <address class="mb-0">
+                        <strong>{{ order.first_name }} {{ order.last_name }}</strong><br>
+                        {{ order.address_line_1 }}<br>
+                        {% if order.address_line_2 %}{{ order.address_line_2 }}<br>{% endif %}
+                        {{ order.city }}, {{ order.state }}<br>
+                        {{ order.country }}<br>
+                        {% if order.phone %}<abbr title="Phone">P:</abbr> {{ order.phone }}{% endif %}
+                    </address>
+                </div>
+            </div>
+
+            <!-- Important Notices -->
+            <div class="alert alert-warning mb-4 mb-md-5">
+                <h5 class="alert-heading h6 fw-bold">Important Information</h5>
+                <ul class="mb-0 small">
+                    <li class="mb-1">Confirmation sent to <strong>{{ order.email }}</strong></li>
+                    <li class="mb-1">Save your order #{{ order.order_number }} for reference</li>
+                    <li class="mb-1">Questions? Contact our <a href="#" class="alert-link">customer service</a></li>
+                    <li>Track your order <a href="#" class="alert-link">here</a></li>
+                </ul>
+            </div>
+
+            <!-- Account Creation CTA -->
+            {% if not request.user.is_authenticated %}
+            <div class="card shadow-sm border-primary mb-4 mb-md-5">
+                <div class="card-body text-center p-3 p-md-4">
+                    <h5 class="h6 fw-bold mb-2">Create an account to track orders</h5>
+                    <p class="small mb-3 mb-md-4">Enjoy faster checkout and order history</p>
+                    <div class="d-flex flex-column flex-md-row justify-content-center gap-2">
+                        <a href="{% url 'register' %}?email={{ order.email|urlencode }}" class="btn btn-primary btn-sm">Create Account</a>
+                        <a href="{% url 'login' %}" class="btn btn-outline-secondary btn-sm">Already have an account?</a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Continue Shopping -->
+            <div class="text-center">
+                <a href="{% url 'store' %}" class="btn btn-outline-primary">Continue Shopping</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Save order details for guest tracking
+    if (!localStorage.getItem('guestOrder_{{ order.order_number }}')) {
+        localStorage.setItem('guestOrder_{{ order.order_number }}', JSON.stringify({
+            orderNumber: '{{ order.order_number }}',
+            email: '{{ order.email }}',
+            date: '{{ order.created_at|date:"Y-m-d" }}'
+        }));
+    }
+    
+    // Mobile-friendly print button
+    const printBtn = document.createElement('button');
+    printBtn.className = 'btn btn-outline-secondary d-print-none position-fixed bottom-0 end-0 m-3 rounded-pill shadow-sm';
+    printBtn.innerHTML = '<i class="bi bi-printer-fill me-1"></i><span class="d-none d-sm-inline">Print</span>';
+    printBtn.onclick = () => window.print();
+    document.body.appendChild(printBtn);
+});
+</script>
+
+<style>
+@media (max-width: 767.98px) {
+    .card-body {
+        padding: 1rem;
+    }
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .container, .container * {
+        visibility: visible;
+    }
+    .container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+        font-size: 12pt;
+    }
+    .no-print, .d-print-none {
+        display: none !important;
+    }
+    .card {
+        border: none;
+        box-shadow: none;
+    }
+    .table {
+        page-break-inside: avoid;
+    }
+}
+</style>
+{% endblock %}
