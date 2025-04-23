@@ -464,7 +464,7 @@ def send_confirmation_email(request, order, order_products, sub_total, tax, gran
     enhanced_products = []
     for item in order_products:
         product_data = {
-            'name': item.product.product_name,
+            'name': item.product.title,
             'quantity': item.quantity,
             'price': item.product_price,
             'image_url': f"https://{domain}{item.product.images.url}" if item.product.images else None,

@@ -135,11 +135,12 @@
                                         <td>
                                             {% if item.image_url %}
                                             <img src="{{ item.image_url }}" alt="{{ item.title|default:item.product.title }}" width="80" style="max-width: 80px; height: auto; display: block; margin-bottom: 5px;" />
+                                            {% else %}
+                                            {{ item.product.title }}
                                             {% endif %}
-                                            {{ item.title|default:item.product.title }}
                                         </td>
                                         <td>{{ item.quantity }}</td>
-                                        <td>${{ item.price|default:item.product_price|floatformat:0 }}</td>
+                                        <td>${{ item.product.discount_amount|floatformat:0 }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
