@@ -36,7 +36,8 @@ from cart.views import calculate_totals
 import uuid
 from cart.views import _cart_id
 from django.http import Http404
-from django.core.mail import send_mail
+# from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.contrib.sites.shortcuts import get_current_site
@@ -456,8 +457,16 @@ def send_confimation_email(request,order,order_products,sub_total,tax,grand_tota
     #get current site domain
     current_site = get_current_site(request)
     domain =current_site.domain
+    # Prepare product images with absolute URLs
+    products_with_images = []
+    for product in order_products:
+        img_url = f"https://{domain}{product.product.images.url}" if product.product.images else None
+        products_with_images.append({
+            **product.__dict__,
+            'image_url': img_url
+        })
     #Render HTML email template
-    html_meassage = render_to_string('orders/order_confrimation_email.html',{
+    html_message = render_to_string('orders/order_confrimation_email.html',{
         'order':order,
         'order_products':order_products,
         'sub_total':sub_total,
@@ -466,20 +475,20 @@ def send_confimation_email(request,order,order_products,sub_total,tax,grand_tota
         'domain':domain,      
     })
     #Convirt Html to plain Text
-    plain_meaggase = strip_tags(html_meassage)
+    plain_message = strip_tags(html_message)
     #Get email from order
     recipient_email = order.email
     #Now we can send email
-    send_mail(
+    # Create email message
+    email = EmailMultiAlternatives(
         subject=subject,
-        message=plain_meaggase,
+        body=plain_message,
         from_email='habibkb5080@gmail.com',
-        recipient_list=[recipient_email],
-        html_message=html_meassage,
-        fail_silently=False,
-        
-        
+        to=[order.email],
+        reply_to=['support@yourdomain.com']
     )
+    email.attach_alternative(html_message, "text/html")
+    email.send()
 
 class CreatePaymentView(View):
     def get(self, request, order_id):
