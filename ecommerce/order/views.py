@@ -439,7 +439,7 @@ def order_success(request, order_id):
         tax = sub_total * Decimal('0')  # 2% tax
         grand_total = sub_total + tax
         #Send confirmation email to the user
-        send_confimation_email(request,order,order_products,sub_total,tax,grand_total)
+        send_confirmation_email(request,order,order_products,sub_total,tax,grand_total)
 
         context = {
             'order': order,
@@ -452,43 +452,59 @@ def order_success(request, order_id):
         
         return render(request, 'orders/order_success.html', context)
     
-def send_confimation_email(request,order,order_products,sub_total,tax,grand_total):
-    subject = f"Order Confirmation #{order.id}"
-    #get current site domain
+def send_confirmation_email(request, order, order_products, sub_total, tax, grand_total):
+    """
+    Send order confirmation email with properly formatted product images
+    """
+    subject = f"Order Confirmation #{order.order_number or order.id}"
     current_site = get_current_site(request)
-    domain =current_site.domain
-    # Prepare product images with absolute URLs
-    products_with_images = []
-    for product in order_products:
-        img_url = f"https://{domain}{product.product.images.url}" if product.product.images else None
-        products_with_images.append({
-            **product.__dict__,
-            'image_url': img_url
-        })
-    #Render HTML email template
-    html_message = render_to_string('orders/order_confrimation_email.html',{
-        'order':order,
-        'order_products':order_products,
-        'sub_total':sub_total,
-        'tax':tax,
-        'grand_total':grand_total, 
-        'domain':domain,      
+    domain = current_site.domain
+    
+    # Prepare products with enhanced data including absolute image URLs
+    enhanced_products = []
+    for item in order_products:
+        product_data = {
+            'name': item.product.product_name,
+            'quantity': item.quantity,
+            'price': item.product_price,
+            'image_url': f"https://{domain}{item.product.images.url}" if item.product.images else None,
+            'product': item.product  # Keep reference to original product if needed
+        }
+        enhanced_products.append(product_data)
+    
+    # Render HTML email template
+    html_message = render_to_string('orders/order_confirmation_email.html', {
+        'order': order,
+        'order_products': enhanced_products,  # Use the enhanced list with image URLs
+        'sub_total': sub_total,
+        'tax': tax,
+        'grand_total': grand_total,
+        'domain': domain,
+        'logo_url': f"https://{domain}/static/images/logo.png"  # Example for logo
     })
-    #Convirt Html to plain Text
+    
+    # Create plain text version
     plain_message = strip_tags(html_message)
-    #Get email from order
-    recipient_email = order.email
-    #Now we can send email
-    # Create email message
-    email = EmailMultiAlternatives(
-        subject=subject,
-        body=plain_message,
-        from_email='habibkb5080@gmail.com',
-        to=[order.email],
-        reply_to=['support@yourdomain.com']
-    )
-    email.attach_alternative(html_message, "text/html")
-    email.send()
+    
+    # Create and send email
+    try:
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_message,
+            from_email='habibkb5080@gmail.com',
+            to=[order.email],
+            reply_to=['support@yourdomain.com'],
+            headers={'X-Entity-Ref-ID': str(order.id)}  # For email tracking
+        )
+        email.attach_alternative(html_message, "text/html")
+        email.send()
+        
+        # Log successful email delivery
+        logger.info(f"Order confirmation sent for order #{order.id} to {order.email}")
+        
+    except Exception as e:
+        logger.error(f"Failed to send order confirmation for order #{order.id}: {str(e)}")
+        # Consider implementing a retry mechanism here
 
 class CreatePaymentView(View):
     def get(self, request, order_id):

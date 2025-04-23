@@ -1,169 +1,200 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Confirmation</title>
-    <style>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order Confirmation #{{ order.id }}</title>
+    <style type="text/css">
+        /* Client-specific styles */
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+        
+        /* General styles */
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: #333333;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+        }
+        
+        /* Layout styles */
+        .email-container {
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
         }
+        
         .header {
             text-align: center;
             padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #eeeeee;
             margin-bottom: 30px;
         }
-        .logo {
-            max-width: 150px;
-        }
-        h1 {
-            color: #2c3e50;
-            font-size: 24px;
-            margin-top: 0;
-        }
+        
         .order-info {
             background-color: #f9f9f9;
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
         }
-        .order-details {
+        
+        .order-table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
         }
-        .order-details th {
+        
+        .order-table th {
             text-align: left;
             padding: 8px;
             background-color: #f2f2f2;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #dddddd;
+            font-weight: bold;
         }
-        .order-details td {
+        
+        .order-table td {
             padding: 8px;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #dddddd;
+            vertical-align: top;
         }
-        .order-details tr:last-child td {
+        
+        .order-table tr:last-child td {
             border-bottom: none;
         }
+        
         .total-row {
             font-weight: bold;
             background-color: #f2f2f2;
         }
-        .footer {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-            font-size: 12px;
-            color: #777;
-            text-align: center;
-        }
+        
         .button {
             display: inline-block;
             padding: 10px 20px;
             background-color: #3498db;
-            color: white !important;
+            color: #ffffff !important;
             text-decoration: none;
             border-radius: 5px;
             margin: 15px 0;
         }
+        
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eeeeee;
+            font-size: 12px;
+            color: #777777;
+            text-align: center;
+        }
     </style>
 </head>
-<body>
-    <div class="header">
-        <!-- Replace with your logo -->
-        <img src="https://yourwebsite.com/static/images/logo.png" alt="Company Logo" class="logo">
-        <h1>Order Confirmation</h1>
-        <p>Thank you for your purchase!</p>
-    </div>
-
-    <div class="order-info">
-        <p><strong>Order Number:</strong> #{{ order.id }}</p>
-        <p><strong>Order Date:</strong> {{ order.created_at|date:"F j, Y" }}</p>
-        {% if order.tracking_number %}
-        <p><strong>Tracking Number:</strong> {{ order.tracking_number }}</p>
-        {% endif %}
-    </div>
-
-    <h2>Order Details</h2>
-    <table class="order-details">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Quantity</th>
-                <th>Price</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in order_products %}
-            <tr>
-                <td>
-                    {% if item.image_url %}
-                    <img src="{{ item.image_url }}" 
-                         alt="{{ item.product.product_name }}"
-                         style="max-width: 80px; display: block;">
-                    {% else %}
-                    No Image
-                    {% endif %}
-                </td>
-                <td>{{ item.quantity }}</td>
-                <td>${{ item.product_price|floatformat:0 }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-        <!-- <tbody>
-            {% for item in order_products %}
-            <tr>{% if item.image_url %}
-                <img src="<td>{{ item.image_url }}</td>" alt="">
-                {% endif %}
-                <td>{{ item.quantity }}</td>
-                <td>${{ item.product_price|floatformat:0 }}</td>
-            </tr>
-            {% endfor %}
-        </tbody> -->
-    </table>
-
-    <table class="order-details">
+<body style="margin: 0; padding: 0;">
+    <!-- Email wrapper -->
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
         <tr>
-            <td>Subtotal:</td>
-            <td>${{ sub_total }}</td>
-        </tr>
-        <tr>
-            <td>Tax:</td>
-            <td>${{ tax }}</td>
-        </tr>
-        <tr class="total-row">
-            <td>Total:</td>
-            <td>${{ grand_total }}</td>
+            <td align="center" style="padding: 20px 0;">
+                <!-- Email container -->
+                <table class="email-container" role="presentation" cellspacing="0" cellpadding="0" border="0" width="600">
+                    <!-- Header -->
+                    <tr>
+                        <td class="header">
+                            <img src="{{ logo_url|default:'https://yourwebsite.com/static/images/logo.png' }}" alt="{{ order.store_name|default:'Company Logo' }}" width="150" style="max-width: 150px; height: auto;" />
+                            <h1 style="color: #2c3e50; font-size: 24px; margin-top: 20px; margin-bottom: 10px;">Order Confirmation</h1>
+                            <p style="margin: 0;">Thank you for your purchase!</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Order info -->
+                    <tr>
+                        <td class="order-info">
+                            <p style="margin: 0 0 8px 0;"><strong>Order Number:</strong> #{{ order.order_number|default:order.id }}</p>
+                            <p style="margin: 0 0 8px 0;"><strong>Order Date:</strong> {{ order.created_at|date:"F j, Y" }}</p>
+                            {% if order.tracking_number %}
+                            <p style="margin: 0;"><strong>Tracking Number:</strong> {{ order.tracking_number }}</p>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    
+                    <!-- Order details -->
+                    <tr>
+                        <td>
+                            <h2 style="margin: 0 0 15px 0; font-size: 18px;">Order Details</h2>
+                            <table class="order-table" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th width="60%">Product</th>
+                                        <th width="20%">Quantity</th>
+                                        <th width="20%">Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in order_products %}
+                                    <tr>
+                                        <td>
+                                            {% if item.image_url %}
+                                            <img src="{{ item.image_url }}" alt="{{ item.title|default:item.product.product_name }}" width="80" style="max-width: 80px; height: auto; display: block; margin-bottom: 5px;" />
+                                            {% endif %}
+                                            {{ item.title|default:item.product.title }}
+                                        </td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>${{ item.price|default:item.product_price|floatformat:0 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            
+                            <!-- Order totals -->
+                            <table class="order-table" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td width="80%">Subtotal:</td>
+                                    <td width="20%">${{ sub_total }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Tax:</td>
+                                    <td>${{ tax }}</td>
+                                </tr>
+                                <tr class="total-row">
+                                    <td>Total:</td>
+                                    <td>${{ grand_total }}</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- CTA button -->
+                    <tr>
+                        <td align="center" style="padding: 10px 0 20px 0;">
+                            <a href="https://{{ domain }}/orders/order_success/{{ order.id }}" class="button" style="color: #ffffff;">View Your Order</a>
+                        </td>
+                    </tr>
+                    
+                    <!-- Shipping info -->
+                    <tr>
+                        <td class="shipping-info">
+                            <h2 style="margin: 0 0 15px 0; font-size: 18px;">Shipping Information</h2>
+                            <p style="margin: 0 0 5px 0;">
+                                {{ order.first_name }} {{ order.last_name }}<br />
+                                {{ order.address_line_1 }}<br />
+                                {% if order.address_line_2 %}{{ order.address_line_2 }}<br />{% endif %}
+                                {{ order.city }}, {{ order.state }} {{ order.zip_code }}<br />
+                                {{ order.country }}<br />
+                                Phone: {{ order.phone }}
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td class="footer">
+                            <p style="margin: 0 0 10px 0;">If you have any questions about your order, please contact our support team at <a href="mailto:support@yourwebsite.com" style="color: #3498db;">support@yourwebsite.com</a></p>
+                            <p style="margin: 0;">&copy; {% now "Y" %} {{ order.store_name|default:"Your Company Name" }}. All rights reserved.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
         </tr>
     </table>
-
-    <div style="text-align: center;">
-        <a href="https://{{ domain }}/orders/order_success/{{ order.id }}" class="button">View Your Order</a>
-    </div>
-
-    <div class="shipping-info">
-        <h2>Shipping Information</h2>
-        <p>
-            {{ order.first_name }} {{ order.last_name }}<br>
-            {{ order.address_line_1 }}<br>
-            {% if order.address_line_2 %}{{ order.address_line_2 }}<br>{% endif %}
-            {{ order.city }}, {{ order.state }} {{ order.zip_code }}<br>
-            {{ order.country }}<br>
-            Phone: {{ order.phone }}
-        </p>
-    </div>
-
-    <div class="footer">
-        <p>If you have any questions about your order, please contact our support team at support@yourwebsite.com</p>
-        <p>&copy; {% now "Y" %} Your Company Name. All rights reserved.</p>
-    </div>
 </body>
 </html>
