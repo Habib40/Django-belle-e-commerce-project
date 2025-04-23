@@ -134,7 +134,7 @@
                                     <tr>
                                         <td>
                                             {% if item.image_url %}
-                                            <img src="{{ item.image_url }}" alt="{{ item.title|default:item.product.product_name }}" width="80" style="max-width: 80px; height: auto; display: block; margin-bottom: 5px;" />
+                                            <img src="{{ item.image_url }}" alt="{{ item.title|default:item.product.title }}" width="80" style="max-width: 80px; height: auto; display: block; margin-bottom: 5px;" />
                                             {% endif %}
                                             {{ item.title|default:item.product.title }}
                                         </td>
