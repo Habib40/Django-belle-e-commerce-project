@@ -282,10 +282,9 @@ def PlaceOrder(request, total=0, tax=0, quantity=0):
 #     }
 #     return render(request, 'accounts/checkout.html', context)
 
-
 def Payments(request, order_id):
     try:
-        # Authenticate order access for users and guests
+        # Authenticate order access
         if request.user.is_authenticated:
             order = get_object_or_404(Order, id=order_id, user=request.user)
         else:
@@ -294,27 +293,37 @@ def Payments(request, order_id):
         # Get order products
         order_products = OrderProduct.objects.filter(order=order)
         
-        # Calculate subtotal (sum of all order products)
-        sub_total = sum(
-            Decimal(str(item.product_price or 0)) * Decimal(str(item.quantity or 1))
+        # Calculate subtotal (sum of product prices × quantities)
+        subtotal = sum(
+            Decimal(item.product_price) * item.quantity
             for item in order_products
         )
+        
+        # Calculate 2% tax
+        tax = subtotal * Decimal('0.02')
+        
+        # Calculate grand_total (subtotal + tax)
+        grand_total = subtotal + tax
+        
+        # Update order totals in database
+        order.sub_total = subtotal
+        order.tax = tax
+        order.order_total = grand_total
+        order.save()
 
-        # Directly fetch tax and totals from Order model
-        tax = order.tax  # Directly use stored tax value
-        print(f'Tax from order: {tax}')
-        grand_total = order.order_total  # Use stored grand total
+        print(f"Subtotal: {subtotal}")
+        print(f"Tax (2%): {tax}")
+        print(f"Grand Total (subtotal + tax): {grand_total}")
 
         context = {
             'order': order,
             'order_products': order_products,
             'payment': order.payment if hasattr(order, 'payment') else None,
-            'sub_total': sub_total,
+            'sub_total': subtotal,
             'tax': tax,
-            'grand_total': grand_total,
+            'grand_total': grand_total,  # Now includes tax
             'is_guest': not request.user.is_authenticated
         }
-
         if request.method == 'POST':
             try:
                 payment_method = request.POST.get('payment_method')
@@ -422,35 +431,97 @@ def Payments(request, order_id):
 #     return render(request, 'orders/payments.html', context)
 
 
-def order_success(request, order_id):
-        # For authenticated users - get their order only
-        if request.user.is_authenticated:
-            order = Order.objects.filter(id=order_id, user=request.user).first()
-        else:
-            # For guests - get order with no user
-            order = Order.objects.filter(id=order_id, user__isnull=True).first()
-        order_products = OrderProduct.objects.filter(order=order)
-        
-        # Calculate order totals to match Payments view
-        sub_total = Decimal('0.00')
-        for item in order_products:
-            sub_total = round(item.product_price * item.quantity)
-        
-        tax = sub_total * Decimal('0')  # 2% tax
-        grand_total = sub_total + tax
-        #Send confirmation email to the user
-        send_confirmation_email(request,order,order_products,sub_total,tax,grand_total)
+# def order_success(request, order_id):
+#     # Get the order
+#     if request.user.is_authenticated:
+#         order = Order.objects.filter(id=order_id, user=request.user).first()
+#     else:
+#         order = Order.objects.filter(id=order_id, user__isnull=True).first()
+    
+#     order_products = OrderProduct.objects.filter(order=order)
+    
+#     # Calculate subtotal (sum of item prices × quantities)
+#     sub_total = Decimal('0.00')
+#     for item in order_products:
+#         sub_total += Decimal(str(item.product_price)) * Decimal(str(item.quantity))
+    
+#     # Calculate 2% tax from the subtotal
+#     tax = sub_total * Decimal('0.02')
+    
+#     # Get the existing grand total (or use subtotal + tax if not set)
+#     grand_total = order.order_total if order.order_total else (sub_total + tax)
+    
+#     # Update the order with all calculated values
+#     order.sub_total = sub_total - tax
+#     order.tax = tax  # Store the calculated 2% tax
+#     order.order_total = grand_total
+#     order.save()
+    
+#     # Send confirmation email
+#     send_confirmation_email(request, order, order_products, sub_total, tax, grand_total)
 
-        context = {
-            'order': order,
-            'order_products': order_products,
-            'sub_total': sub_total,
-            'tax': order.tax,
-            'grand_total': round(grand_total, 2),
-            'is_guest': not request.user.is_authenticated
-        }
-        
-        return render(request, 'orders/order_success.html', context)
+#     context = {
+#         'order': order,
+#         'order_products': order_products,
+#         'sub_total': sub_total,
+#         'tax': tax,
+#         'grand_total': grand_total,
+#         'is_guest': not request.user.is_authenticated
+#     }
+    
+#     return render(request, 'orders/order_success.html', context)
+def order_success(request, order_id):
+    # Get the order
+    if request.user.is_authenticated:
+        order = Order.objects.filter(id=order_id, user=request.user).first()
+    else:
+        order = Order.objects.filter(id=order_id, user__isnull=True).first()
+    
+    if not order:
+        return redirect('some_error_page')
+    
+    order_products = OrderProduct.objects.filter(order=order)
+    
+    # Calculate gross total (sum of item prices × quantities)
+    gross_total = Decimal('0.00')
+    for item in order_products:
+        gross_total += Decimal(str(item.product_price)) * Decimal(str(item.quantity))
+    
+    # Calculate 2% tax from the gross total
+    tax = gross_total * Decimal('0.02')
+    
+    # Calculate subtotal (gross total minus tax)
+    sub_total = gross_total - tax
+    
+    # Use existing grand_total if set, otherwise use gross_total (original amount)
+    grand_total = order.order_total if order.order_total else gross_total
+    
+    # Update the order with all calculated values
+    order.sub_total = sub_total  # Now storing (gross - tax)
+    order.tax = tax
+    order.order_total = grand_total
+    order.save()
+    
+    # Debug prints
+    print(f"Gross Total (before tax): {gross_total}")
+    print(f"Calculated Tax (2%): {tax}")
+    print(f"Subtotal (gross - tax): {sub_total}")
+    print(f"Grand Total: {grand_total}")
+    
+    # Send confirmation email
+    send_confirmation_email(request, order, order_products, sub_total, tax, grand_total)
+
+    context = {
+        'order': order,
+        'order_products': order_products,
+        'gross_total': gross_total,  # New - showing original sum before tax deduction
+        'sub_total': sub_total,     # Now showing gross_total - tax
+        'tax': tax,
+        'grand_total': grand_total,
+        'is_guest': not request.user.is_authenticated
+    }
+    
+    return render(request, 'orders/order_success.html', context)
     
 def send_confirmation_email(request, order, order_products, sub_total, tax, grand_total):
     """

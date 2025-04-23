@@ -150,15 +150,15 @@
                             <table class="order-table" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                                 <tr>
                                     <td width="80%">Subtotal:</td>
-                                    <td width="20%">${{ sub_total }}</td>
+                                    <td width="20%">${{ sub_total|floatformat:0 }}</td>
                                 </tr>
                                 <tr>
                                     <td>Tax:</td>
-                                    <td>${{ tax }}</td>
+                                    <td>${{ tax|floatformat:0 }}</td>
                                 </tr>
                                 <tr class="total-row">
                                     <td>Total:</td>
-                                    <td>${{ grand_total }}</td>
+                                    <td>${{ grand_total|floatformat:0 }}</td>
                                 </tr>
                             </table>
                         </td>
