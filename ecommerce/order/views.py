@@ -450,8 +450,9 @@ def order_success(request, order_id):
         }
         
         return render(request, 'orders/order_success.html', context)
+    
 def send_confimation_email(request,order,order_products,sub_total,tax,grand_total):
-    subject = f"Order Confirmation #{order.order_number}"
+    subject = f"Order Confirmation #{order.id}"
     #get current site domain
     current_site = get_current_site(request)
     domain =current_site.domain
