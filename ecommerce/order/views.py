@@ -290,32 +290,35 @@ def Payments(request, order_id):
         else:
             order = get_object_or_404(Order, id=order_id, user__isnull=True)
 
-        # Get order products
+        # Get order products with product data
         order_products = OrderProduct.objects.filter(order=order).select_related('product')
 
-        # Calculate subtotal (sum of product prices × quantities)
-        subtotal = sum(
-            Decimal(item.product.discount_amount) * item.quantity
-            for item in order_products
-        )
+        # Calculate subtotal using discount_amount if available, otherwise regular price
+        subtotal = Decimal('0.00')
+        for item in order_products:
+            # Use discount_amount as the price if available, otherwise use regular price
+            item_price = Decimal(str(item.product.discount_amount)) if item.product.discount_amount else Decimal(str(item.product.price))
+            subtotal += item_price * Decimal(str(item.quantity))
 
-        # Calculate tax
-        tax = Decimal('0.02')  # Fixed tax amount as per your example
+        # Calculate tax (2% of subtotal)
+        tax = (subtotal * Decimal('0.02')).quantize(Decimal('0.00'))
 
         # Calculate grand total (subtotal + tax)
-        grand_total = subtotal + tax
+        grand_total = (subtotal + tax).quantize(Decimal('0.00'))
 
         # Update order totals in database
+        order.sub_total = subtotal
         order.tax = tax
-        order.order_total = grand_total  # Order total includes tax
+        order.order_total = grand_total  # Includes tax
         order.save()
+
         context = {
             'order': order,
             'order_products': order_products,
             'payment': order.payment if hasattr(order, 'payment') else None,
-            'sub_total': subtotal,  # Subtotal without tax
+            'sub_total': subtotal,  # Before tax
             'tax': tax,
-            'grand_total': grand_total,  # Grand total includes tax
+            'grand_total': grand_total,  # After tax
             'is_guest': not request.user.is_authenticated
         }
         if request.method == 'POST':
