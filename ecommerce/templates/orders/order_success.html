@@ -105,7 +105,7 @@
                                         </td>
                                         <td class="text-end">${{ item.product.discount_amount|floatformat:2 }}</td>
                                         <td class="text-center">{{ item.quantity }}</td>
-                                        <td class="text-end fw-bold">${{ sub_total|floatformat:0 }}</td>
+                                        <td class="text-end fw-bold">${{ item.sub_total|floatformat:0 }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
